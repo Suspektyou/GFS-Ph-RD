@@ -1,206 +1,486 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, user-scalable=no" name="viewport"/>
-    <title>GFS Präsentation: Kraftwerke</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physik der Kraftwerke - Eine moderne Präsentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Globale Stile & Schriftart */
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-        
-        html, body {
-            overflow: hidden;
-            height: 100%;
-            width: 100%;
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e3a8a;
+            --accent-color: #f59e0b;
+            --background-color: #f1f5f9;
+            --text-color: #1e293b;
+            --slide-width: 1280px;
+            --slide-height: 720px;
         }
-        
+
         body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #333;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--secondary-color);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
         }
 
         #presentation-container {
+            width: var(--slide-width);
+            height: var(--slide-height);
             position: relative;
-            width: 1280px; 
-            height: 720px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            transform-origin: center center;
-            background: #e9ecef;
+            transform: scale(var(--scale, 1));
+            transform-origin: top left;
         }
 
         .slide {
             position: absolute;
             width: 100%;
             height: 100%;
+            background-color: var(--background-color);
+            border-radius: 12px;
             overflow: hidden;
-            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
             opacity: 0;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
             transform: scale(0.95);
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             pointer-events: none;
+            display: flex;
+            flex-direction: column;
         }
 
         .slide.active {
             opacity: 1;
             transform: scale(1);
-            z-index: 10;
             pointer-events: auto;
+            z-index: 10;
+        }
+
+        .slide-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .slide-content {
+            padding: 2rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #nav-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            z-index: 100;
         }
 
         .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 55px;
-            height: 55px;
-            background-color: rgba(0, 0, 0, 0.3);
             color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
+            font-size: 24px;
             cursor: pointer;
             user-select: none;
-            transition: background-color 0.2s, opacity 0.3s;
-            z-index: 100;
-            opacity: 0.5;
+            transition: color 0.2s;
         }
-        .nav-arrow:hover {
-            background-color: rgba(0, 0, 0, 0.6);
-            opacity: 1;
-        }
-        #prev { left: 25px; }
-        #next { right: 25px; }
 
-        /* Spezifische Stile (unverändert) */
-        .gradient-overlay { background: linear-gradient(135deg, rgba(0,123,255,0.8) 0%, rgba(40,167,69,0.7) 100%); }
-        .title-bar { background: linear-gradient(90deg, #007bff 0%, #28a745 100%); }
-        .content-box { background-color: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
-        .icon-box { background-color: rgba(255, 193, 7, 0.15); border-radius: 12px; width: 60px; height: 60px; }
-        .conventional { background: linear-gradient(135deg, #007bff 0%, #6c757d 100%); }
-        .renewable { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-        .icon-circle { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; transition: all 0.3s ease; }
-        .icon-circle:hover { transform: scale(1.05); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-        .power-type:hover { transform: translateY(-5px); }
-        .card { background-color: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .nav-arrow:hover {
+            color: var(--accent-color);
+        }
+
+        #slide-counter {
+            color: white;
+            margin: 0 15px;
+            font-size: 1rem;
+        }
+        
+        #progress-bar-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            z-index: 100;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease-out;
+        }
+        
+        .key-takeaway {
+            background-color: #eef2ff;
+            border-left: 5px solid var(--primary-color);
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .key-takeaway h3 {
+            color: var(--secondary-color);
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
     </style>
 </head>
 <body>
 
-<div id="presentation-container">
-    <div id="prev" class="nav-arrow">‹</div>
-    <div id="next" class="nav-arrow">›</div>
-
-    <div class="slide active">
-        <img alt="Strommasten bei Sonnenuntergang" class="absolute inset-0 w-full h-full object-cover" src="https://picture-search.skywork.ai/aippt/image/sheet/b101b528869bc7ac793b5f8b533e9642.jpg"/>
-        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div class="absolute inset-0 flex flex-col justify-center items-center text-white p-16">
-            <div class="w-24 h-1 bg-yellow-400 mb-8"></div><h1 class="text-6xl font-bold text-center mb-6 leading-tight">Kraftwerke</h1><h2 class="text-4xl font-light text-center mb-12">Energieerzeugung für die Zukunft</h2><div class="w-32 h-1 bg-yellow-400 mb-12"></div><p class="text-2xl font-light text-center mb-16">GFS im Fach Physik</p>
-            <div class="absolute bottom-12 left-0 right-0"><div class="flex justify-center items-center space-x-6"><div class="flex items-center"><i class="fas fa-graduation-cap text-yellow-400 mr-2"></i><span>8. Klasse Realschule</span></div><div class="flex items-center"><i class="fas fa-atom text-yellow-400 mr-2"></i><span>Physik</span></div><div class="flex items-center"><i class="fas fa-calendar-alt text-yellow-400 mr-2"></i><span>2025</span></div></div></div>
+    <div id="presentation-container">
+        <div class="slide active">
+            <div class="h-full w-full bg-cover bg-center" style="background-image: url('https://picture-search.skywork.ai/aippt/image/sheet/b101b528869bc7ac793b5f8b533e9642.jpg');">
+                <div class="h-full w-full bg-black bg-opacity-60 flex flex-col justify-center items-center text-white text-center p-8">
+                    <h1 class="text-7xl font-bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Physik der Kraftwerke</h1>
+                    <p class="text-4xl mt-4 font-light" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Energieerzeugung und Umwandlung</p>
+                    <div class="mt-12 border-t-2 border-accent-color w-1/4"></div>
+                    <p class="mt-8 text-xl">Eine Übersicht über die physikalischen Prinzipien moderner Energieerzeugung.</p>
+                </div>
+            </div>
         </div>
-        <div class="absolute top-0 left-0 w-40 h-40"><div class="absolute top-0 left-0 w-full h-full border-t-8 border-l-8 border-yellow-400 opacity-70"></div></div><div class="absolute bottom-0 right-0 w-40 h-40"><div class="absolute bottom-0 right-0 w-full h-full border-b-8 border-r-8 border-yellow-400 opacity-70"></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-white opacity-70">1/12</span></div>
+        
+        <div class="slide">
+            <header class="slide-header">Überblick: Kraftwerke und Energieumwandlung</header>
+            <div class="slide-content">
+                <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Grundprinzip aller Kraftwerke</h2>
+                        <p class="text-xl mb-8">Kraftwerke sind Anlagen, die verschiedene Energieformen in die für uns universell nutzbare elektrische Energie umwandeln.</p>
+                        <div class="flex items-center justify-around text-center text-lg font-semibold">
+                            <div class="flex flex-col items-center"><i class="fas fa-fire text-5xl text-red-500 mb-2"></i><span>Primärenergie</span></div>
+                            <i class="fas fa-arrow-right text-4xl text-accent-color"></i>
+                            <div class="flex flex-col items-center"><i class="fas fa-cogs text-5xl text-gray-500 mb-2"></i><span>Umwandlung</span></div>
+                             <i class="fas fa-arrow-right text-4xl text-accent-color"></i>
+                            <div class="flex flex-col items-center"><i class="fas fa-bolt text-5xl text-yellow-500 mb-2"></i><span>Elektrische Energie</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-200 p-6 rounded-lg">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-6">Hauptkategorien</h2>
+                        <h3 class="text-2xl text-gray-700 mb-3 flex items-center"><i class="fas fa-industry mr-3 text-primary-color"></i>Konventionelle Kraftwerke</h3>
+                        <ul class="list-disc list-inside text-xl ml-4 space-y-2 mb-6">
+                            <li>Kohlekraftwerke</li>
+                            <li>Gaskraftwerke</li>
+                            <li>Kernkraftwerke</li>
+                        </ul>
+                        <h3 class="text-2xl text-green-600 mb-3 flex items-center"><i class="fas fa-leaf mr-3"></i>Erneuerbare Energien</h3>
+                        <ul class="list-disc list-inside text-xl ml-4 space-y-2">
+                             <li>Wasserkraftwerke</li>
+                            <li>Windkraftwerke</li>
+                            <li>Solarkraftwerke</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <header class="slide-header">Physikalisches Grundprinzip: Energieerhaltung</header>
+            <div class="slide-content">
+                 <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Der Energieerhaltungssatz</h2>
+                        <p class="text-xl mb-6">"Energie kann weder erzeugt noch vernichtet, sondern nur von einer Form in eine andere umgewandelt werden."</p>
+                        <div class="bg-blue-100 p-4 rounded-lg text-xl mb-8">
+                            <p class="font-semibold text-center">In einem geschlossenen System bleibt die Gesamtenergie stets konstant.</p>
+                        </div>
+                        <h3 class="text-2xl font-semibold text-secondary-color mb-4">Beispiel: Umwandlungskette im Kohlekraftwerk</h3>
+                        <div class="flex items-center justify-between text-center text-sm">
+                            <div class="flex flex-col items-center"><div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-fire text-4xl text-yellow-500"></i></div><span class="mt-2 font-semibold">Chemische Energie</span></div>
+                            <i class="fas fa-chevron-right text-2xl text-gray-400"></i>
+                             <div class="flex flex-col items-center"><div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-temperature-high text-4xl text-red-500"></i></div><span class="mt-2 font-semibold">Wärmeenergie</span></div>
+                            <i class="fas fa-chevron-right text-2xl text-gray-400"></i>
+                             <div class="flex flex-col items-center"><div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-cogs text-4xl text-blue-500"></i></div><span class="mt-2 font-semibold">Mechanische Energie</span></div>
+                            <i class="fas fa-chevron-right text-2xl text-gray-400"></i>
+                             <div class="flex flex-col items-center"><div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-bolt text-4xl text-green-500"></i></div><span class="mt-2 font-semibold">Elektrische Energie</span></div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-200 p-6 rounded-lg flex flex-col items-center justify-center text-center">
+                         <h2 class="text-3xl font-semibold text-secondary-color mb-6">Energie wird umgewandelt, nicht "erzeugt"</h2>
+                         <i class="fas fa-sync-alt text-8xl text-primary-color animate-spin [animation-duration:10s]"></i>
+                         <div class="key-takeaway mt-8 w-full">
+                            <h3>Bedeutung für Kraftwerke:</h3>
+                            <ul class="list-disc list-inside mt-2 text-lg">
+                                <li>Kraftwerke sind Energie-Umwandler.</li>
+                                <li>Der Wirkungsgrad beschreibt die Effizienz dieser Umwandlung – ein Teil geht immer als Wärme verloren.</li>
+                            </ul>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <header class="slide-header">Konventionelle Kraftwerke: Thermodynamik</header>
+            <div class="slide-content">
+                <h2 class="text-3xl font-semibold text-secondary-color mb-6 text-center">Der Dampfkreislauf in Wärmekraftwerken</h2>
+                <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center">
+                        <div class="space-y-4 text-xl">
+                            <div class="flex items-center"><div class="w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">1</div><p><strong class="font-semibold">Verbrennung:</strong> Chemische Energie (Kohle, Gas) wird in Wärme umgewandelt.</p></div>
+                             <div class="flex items-center"><div class="w-12 h-12 bg-yellow-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">2</div><p><strong class="font-semibold">Dampferzeugung:</strong> Die Wärme erhitzt Wasser zu Hochdruck-Wasserdampf.</p></div>
+                             <div class="flex items-center"><div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">3</div><p><strong class="font-semibold">Turbine & Generator:</strong> Der Dampf treibt eine Turbine an, die mit einem Generator Strom erzeugt.</p></div>
+                             <div class="flex items-center"><div class="w-12 h-12 bg-teal-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">4</div><p><strong class="font-semibold">Kondensation:</strong> Der Dampf wird gekühlt (Kühlturm), kondensiert zu Wasser und der Kreislauf beginnt von neuem.</p></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/07eaee4dc39d0190d25ba22f5a4307af.jpg" class="rounded-lg shadow-lg object-cover h-64 w-full mb-4">
+                        <div class="key-takeaway w-full">
+                            <h3>Physikalische Prinzipien</h3>
+                            <ul class="list-disc list-inside mt-2 text-lg">
+                                <li><strong>Thermodynamik:</strong> Die Lehre der Wärme und ihrer Umwandlung in andere Energieformen.</li>
+                                <li><strong>Phasenübergang:</strong> Die Umwandlung von Wasser zu Dampf ist entscheidend, um Wärme in mechanische Energie zu überführen.</li>
+                                <li><strong>Wirkungsgrad:</strong> Konventionelle Kraftwerke haben einen Wirkungsgrad von ca. 30-60%. Der Rest ist Abwärme.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+             <header class="slide-header">Kernkraftwerke: Kernspaltung & Kettenreaktion</header>
+             <div class="slide-content">
+                <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Physik der Kernspaltung</h2>
+                        <ul class="space-y-4 text-xl">
+                            <li class="flex items-start"><i class="fas fa-atom text-yellow-500 text-2xl mr-3 mt-1"></i><span>Ein schwerer Atomkern (z.B. Uran-235) wird durch ein Neutron beschossen und zerfällt in kleinere Teile.</span></li>
+                            <li class="flex items-start"><i class="fas fa-bolt text-yellow-500 text-2xl mr-3 mt-1"></i><span>Dabei wird eine enorme Menge Energie (Bindungsenergie) als Wärme freigesetzt.</span></li>
+                            <li class="flex items-start"><i class="fas fa-project-diagram text-yellow-500 text-2xl mr-3 mt-1"></i><span>Zusätzlich werden neue Neutronen freigesetzt, die weitere Kerne spalten können – eine <strong class="font-semibold">Kettenreaktion</strong> entsteht.</span></li>
+                            <li class="flex items-start"><i class="fas fa-cogs text-yellow-500 text-2xl mr-3 mt-1"></i><span>Im Reaktor wird diese Kettenreaktion kontrolliert, um die Wärme zur Dampferzeugung zu nutzen.</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-200 p-6 rounded-lg flex flex-col items-center justify-center">
+                        <h3 class="text-2xl font-semibold mb-4 text-center">Vereinfachte Kettenreaktion</h3>
+                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/e751f9bc5fad9f6adbaf31dd11b0f548.jpg" class="rounded-lg shadow-lg object-contain h-auto w-full mb-4">
+                        <p class="text-center text-lg mt-2">Die freigesetzte Wärme eines Kernkraftwerks wird genutzt, um einen thermodynamischen Kreislauf (wie im Wärmekraftwerk) anzutreiben.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <header class="slide-header">Wasserkraftwerke: Potentielle & Kinetische Energie</header>
+            <div class="slide-content">
+                 <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center pr-8">
+                         <h2 class="text-3xl font-semibold text-secondary-color mb-6">Physikalische Grundlagen</h2>
+                         <div class="mb-6">
+                            <h3 class="text-2xl text-yellow-600 font-semibold">Potentielle Energie (Lageenergie)</h3>
+                            <p class="text-xl mt-2">Ein Stausee speichert Wasser in großer Höhe. Diese gespeicherte Energie ($E_{pot} = m \cdot g \cdot h$) ist die Grundlage für Speicherkraftwerke.</p>
+                         </div>
+                         <div>
+                            <h3 class="text-2xl text-blue-600 font-semibold">Kinetische Energie (Bewegungsenergie)</h3>
+                            <p class="text-xl mt-2">Wenn das Wasser abfließt, wird potentielle in kinetische Energie ($E_{kin} = \frac{1}{2} \cdot m \cdot v^2$) umgewandelt. Diese Bewegungsenergie des Wassers treibt die Turbine an.</p>
+                         </div>
+                         <div class="key-takeaway mt-8">
+                            <h3>Höchste Effizienz</h3>
+                            <p class="text-lg mt-2">Wasserkraftwerke sind mit einem Wirkungsgrad von bis zu 90% die effizientesten Energieumwandler.</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/048e970c028019b1b2ac5cdad246e2a7.jpg" class="rounded-lg shadow-lg object-cover w-full h-80 mb-6">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div class="bg-blue-100 p-4 rounded-lg">
+                                <h4 class="text-xl font-semibold">Laufwasserkraftwerk</h4>
+                                <p>Nutzt die natürliche Strömung eines Flusses.</p>
+                            </div>
+                            <div class="bg-yellow-100 p-4 rounded-lg">
+                                <h4 class="text-xl font-semibold">Speicherkraftwerk</h4>
+                                <p>Nutzt aufgestautes Wasser aus einem Reservoir.</p>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+             <header class="slide-header">Windkraftwerke: Aerodynamik & Rotationsmechanik</header>
+             <div class="slide-content">
+                <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center">
+                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/9a46f7ed2c042c2d79e6251f4d86cf4a.jpg" class="rounded-lg shadow-lg object-cover w-full h-80 mb-6">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Vom Wind zum Strom</h2>
+                         <ul class="space-y-4 text-xl">
+                            <li class="flex items-start"><i class="fas fa-wind text-blue-500 text-2xl mr-3 mt-1"></i><div><strong class="font-semibold">Aerodynamik:</strong> Die Rotorblätter sind wie Flugzeugflügel geformt. Der Wind erzeugt durch Druckunterschiede an den Blättern Auftrieb, was zu einer Drehbewegung führt.</div></li>
+                            <li class="flex items-start"><i class="fas fa-sync-alt text-blue-500 text-2xl mr-3 mt-1"></i><div><strong class="font-semibold">Rotationsmechanik:</strong> Die Drehung wird über eine Welle und ein Getriebe (das die Drehzahl erhöht) an den Generator weitergeleitet.</div></li>
+                            <li class="flex items-start"><i class="fas fa-bolt text-blue-500 text-2xl mr-3 mt-1"></i><div><strong class="font-semibold">Induktion:</strong> Der Generator wandelt die mechanische Rotationsenergie durch elektromagnetische Induktion in elektrische Energie um.</div></li>
+                         </ul>
+                         <div class="key-takeaway mt-6">
+                            <h3>Wirkungsgrad</h3>
+                            <p class="text-lg mt-2">Moderne Windkraftanlagen erreichen einen Wirkungsgrad von ca. 35-45%.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <header class="slide-header">Solarkraftwerke: Der Photoelektrische Effekt</header>
+            <div class="slide-content">
+                 <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Physik der Photovoltaik</h2>
+                        <p class="text-xl mb-6">Die direkte Umwandlung von Lichtenergie in elektrische Energie basiert auf dem photoelektrischen Effekt in Halbleitermaterialien (meist Silizium).</p>
+                        <ul class="space-y-3 text-lg">
+                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">1.</span><strong>Lichtabsorption:</strong> Sonnenlicht (Photonen) trifft auf die Solarzelle und überträgt seine Energie auf die Elektronen im Halbleiter.</li>
+                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">2.</span><strong>Elektronenanregung:</strong> Die Elektronen werden durch die Energie aus ihrer Bindung gelöst und können sich frei bewegen.</li>
+                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">3.</span><strong>Stromfluss:</strong> Ein eingebautes elektrisches Feld (p-n-Übergang) in der Solarzelle zwingt diese freien Elektronen, in eine Richtung zu fließen. Es entsteht Gleichstrom.</li>
+                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">4.</span><strong>Umwandlung:</strong> Ein Wechselrichter wandelt den erzeugten Gleichstrom in den für das Stromnetz benötigten Wechselstrom um.</li>
+                        </ul>
+                    </div>
+                    <div class="flex flex-col justify-center items-center bg-gray-200 p-6 rounded-lg">
+                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/81a1abd0d777ee8b043690055c1ed74b.jpg" class="rounded-lg shadow-lg object-cover w-full h-64 mb-6">
+                         <div class="key-takeaway w-full">
+                            <h3>Wirkungsgrad von Solarzellen</h3>
+                            <p class="text-lg mt-2">Kommerzielle Photovoltaikanlagen wandeln heute etwa 15-22% des einfallenden Sonnenlichts in elektrische Energie um. Im Labor werden bereits höhere Werte erzielt.</p>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        
+        <div class="slide">
+            <header class="slide-header">Wirkungsgrad & Energieverluste</header>
+            <div class="slide-content">
+                 <div class="grid grid-cols-2 gap-8 flex-grow">
+                    <div class="flex flex-col justify-center">
+                         <h2 class="text-3xl font-semibold text-secondary-color mb-4">Was ist der Wirkungsgrad?</h2>
+                         <p class="text-xl mb-4">Der Wirkungsgrad ($\eta$) ist das Verhältnis von nutzbarer Energie (Output) zu zugeführter Energie (Input). Er ist ein Maß für die Effizienz der Energieumwandlung.</p>
+                         <p class="text-xl bg-gray-200 p-4 rounded-lg text-center font-semibold">$\eta = \frac{E_{nutz}}{E_{zu}}$</p>
+                         <p class="text-xl mt-4">Ein Wirkungsgrad von 100% ist physikalisch unmöglich (2. Hauptsatz der Thermodynamik), da bei jeder realen Energieumwandlung ein Teil der Energie als nicht nutzbare Wärme an die Umgebung abgegeben wird.</p>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <h2 class="text-3xl font-semibold text-secondary-color mb-6 text-center">Wirkungsgrade im Vergleich</h2>
+                        <div class="space-y-4">
+                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-green-600 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 90%"><span>Wasserkraft</span> <span>bis 90%</span></div></div>
+                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-blue-600 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 60%"><span>Gaskraftwerk (GuD)</span> <span>bis 60%</span></div></div>
+                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-teal-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 45%"><span>Windkraftwerk</span> <span>~45%</span></div></div>
+                             <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-gray-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 45%"><span>Kohlekraftwerk</span> <span>bis 45%</span></div></div>
+                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-indigo-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 35%"><span>Kernkraftwerk</span> <span>~35%</span></div></div>
+                             <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-yellow-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 22%"><span>Solarkraftwerk (PV)</span> <span>~22%</span></div></div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <div class="slide">
+             <header class="slide-header">Zukunftsperspektiven: Physik neuer Energietechnologien</header>
+             <div class="slide-content">
+                <div class="grid grid-cols-3 gap-6 flex-grow">
+                    <div class="bg-orange-100 p-6 rounded-lg border-l-4 border-orange-500">
+                        <h3 class="text-2xl font-semibold text-orange-800 mb-3 flex items-center"><i class="fas fa-atom mr-3"></i>Kernfusion</h3>
+                        <p class="mb-3">Die Energie der Sterne auf der Erde: Leichte Atomkerne (Deuterium, Tritium) verschmelzen bei extremen Temperaturen (>100 Mio. °C) und setzen gewaltige Energiemengen frei.</p>
+                         <p><strong class="font-semibold">Physik:</strong> Plasmaeindämmung durch starke Magnetfelder.</p>
+                    </div>
+                    <div class="bg-yellow-100 p-6 rounded-lg border-l-4 border-yellow-500">
+                        <h3 class="text-2xl font-semibold text-yellow-800 mb-3 flex items-center"><i class="fas fa-solar-panel mr-3"></i>Fortschrittliche PV</h3>
+                        <p class="mb-3">Steigerung der Effizienz durch neue Materialien und Konzepte, die ein breiteres Spektrum des Sonnenlichts nutzen.</p>
+                         <p><strong class="font-semibold">Physik:</strong> Mehrschicht-Solarzellen, Perowskite, Quantenpunkte.</p>
+                    </div>
+                    <div class="bg-green-100 p-6 rounded-lg border-l-4 border-green-500">
+                        <h3 class="text-2xl font-semibold text-green-800 mb-3 flex items-center"><i class="fas fa-battery-full mr-3"></i>Energiespeicherung</h3>
+                        <p class="mb-3">Der Schlüssel für eine 100% erneuerbare Versorgung, um die schwankende Verfügbarkeit von Wind und Sonne auszugleichen.</p>
+                         <p><strong class="font-semibold">Physik:</strong> Elektrochemie (Batterien), Elektrolyse (Wasserstoff), Thermische Speicher.</p>
+                    </div>
+                </div>
+                 <div class="key-takeaway mt-8">
+                    <h3>Der Weg in die Zukunft</h3>
+                    <p class="text-lg mt-2">Die nachhaltige Energieversorgung ist eine der größten Herausforderungen unserer Zeit. Innovative physikalische Konzepte und deren technische Anwendung sind der Schlüssel, um diese Herausforderung zu meistern und eine saubere, zuverlässige und bezahlbare Energiezukunft für alle zu schaffen.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="nav-controls">
+            <div id="prev" class="nav-arrow mr-4"><i class="fas fa-chevron-left"></i></div>
+            <div id="slide-counter">1 / 10</div>
+            <div id="next" class="nav-arrow ml-4"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
     </div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-8"><h1 class="text-4xl font-bold text-white">Einführung: Woher kommt unser Strom?</h1></div><div class="grid grid-cols-12 gap-6 h-5/6"><div class="col-span-7"><div class="content-box p-6 h-full"><p class="text-xl mb-6">Stellt euch vor, ihr wacht morgens auf, macht das Licht an, ladet euer Handy oder schaut fern. <span class="font-semibold text-blue-600">All das braucht Strom!</span> Aber woher kommt dieser Strom eigentlich?</p><p class="text-xl mb-8">Kraftwerke sind riesige Anlagen, die dafür sorgen, dass wir rund um die Uhr mit <span class="font-semibold text-blue-600">elektrischer Energie</span> versorgt werden.</p><div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6"><p class="text-lg">Ohne Kraftwerke würde unser modernes Leben, so wie wir es kennen, nicht funktionieren. Sie sind sozusagen die <span class="font-bold">Herzen unserer Energieversorgung</span>.</p></div><p class="text-lg italic text-gray-700">In den nächsten Minuten schauen wir uns genauer an, wie diese Kraftwerke funktionieren und welche verschiedenen Arten es gibt.</p></div></div><div class="col-span-5"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-6 text-center">Kraftwerke sind wichtig für:</h2><div class="flex items-start mb-6"><div class="icon-box flex items-center justify-center mr-4"><i class="fas fa-home text-3xl text-yellow-500"></i></div><div><h3 class="text-xl font-medium mb-1">Unseren Alltag</h3><p>Licht, Heizung, Handys, Computer, Fernseher und vieles mehr</p></div></div><div class="flex items-start mb-6"><div class="icon-box flex items-center justify-center mr-4"><i class="fas fa-industry text-3xl text-yellow-500"></i></div><div><h3 class="text-xl font-medium mb-1">Die Industrie</h3><p>Fabriken, Produktionsanlagen und Maschinen</p></div></div><div class="flex items-start mb-6"><div class="icon-box flex items-center justify-center mr-4"><i class="fas fa-hospital text-3xl text-yellow-500"></i></div><div><h3 class="text-xl font-medium mb-1">Wichtige Einrichtungen</h3><p>Krankenhäuser, Schulen und öffentliche Gebäude</p></div></div><div class="flex items-start"><div class="icon-box flex items-center justify-center mr-4"><i class="fas fa-bus text-3xl text-yellow-500"></i></div><div><h3 class="text-xl font-medium mb-1">Verkehr</h3><p>E-Autos, Bahnen und elektronische Verkehrssysteme</p></div></div></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">2/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-8"><h1 class="text-4xl font-bold text-white">Arten von Kraftwerken: Der Überblick</h1></div><div class="text-center mb-8"><p class="text-xl">Kraftwerke lassen sich grob in zwei Hauptkategorien einteilen:</p></div><div class="grid grid-cols-2 gap-8 mb-6"><div class="card p-6"><div class="conventional text-white rounded-lg p-4 mb-4"><h2 class="text-2xl font-bold text-center">Konventionelle Kraftwerke</h2><p class="text-center">Nutzen fossile Brennstoffe oder Kernenergie</p></div><div class="grid grid-cols-3 gap-4"><div class="power-type text-center p-3"><div class="icon-circle bg-gray-200"><i class="fas fa-industry text-4xl text-gray-700"></i></div><h3 class="text-lg font-semibold">Kohlekraftwerke</h3><p class="text-sm">Verbrennen Stein- oder Braunkohle</p></div><div class="power-type text-center p-3"><div class="icon-circle bg-gray-200"><i class="fas fa-fire-flame-simple text-4xl text-blue-500"></i></div><h3 class="text-lg font-semibold">Gaskraftwerke</h3><p class="text-sm">Verbrennen Erdgas</p></div><div class="power-type text-center p-3"><div class="icon-circle bg-gray-200"><i class="fas fa-atom text-4xl text-red-500"></i></div><h3 class="text-lg font-semibold">Kernkraftwerke</h3><p class="text-sm">Nutzen Kernspaltung</p></div></div><div class="bg-blue-50 border-l-4 border-blue-500 p-3 mt-4"><p class="text-sm">Diese Kraftwerke verwenden meist Energieträger, die bei ihrer Nutzung verbraucht werden.</p></div></div><div class="card p-6"><div class="renewable text-white rounded-lg p-4 mb-4"><h2 class="text-2xl font-bold text-center">Erneuerbare Energien</h2><p class="text-center">Nutzen natürliche, unerschöpfliche Energiequellen</p></div><div class="grid grid-cols-3 gap-4"><div class="power-type text-center p-3"><div class="icon-circle bg-gray-200"><i class="fas fa-wind text-4xl text-blue-400"></i></div><h3 class="text-lg font-semibold">Windkraftwerke</h3><p class="text-sm">Nutzen Windenergie</p></div><div class="power-type text-center p-3"><div class="icon-circle bg-gray-200"><i class="fas fa-sun text-4xl text-yellow-500"></i></div><h3 class="text-lg font-semibold">Solarkraftwerke</h3><p class="text-sm">Nutzen Sonnenlicht</p></div><div class="power-type text-center p-3"><div class="icon-circle bg-gray-200"><i class="fas fa-water text-4xl text-blue-600"></i></div><h3 class="text-lg font-semibold">Wasserkraftwerke</h3><p class="text-sm">Nutzen fließendes Wasser</p></div></div><div class="bg-green-50 border-l-4 border-green-500 p-3 mt-4"><p class="text-sm">Diese Kraftwerke greifen auf Energiequellen zurück, die praktisch unerschöpflich sind oder sich ständig erneuern.</p></div></div></div><div class="text-center mt-2"><p class="text-lg">In den folgenden Folien schauen wir uns jede Kraftwerksart genauer an!</p></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">3/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Konventionelle Kraftwerke: Kohle & Gas</h1></div><div class="grid grid-cols-2 gap-6"><div class="content-box p-5" style="background: linear-gradient(to bottom right, rgba(108, 117, 125, 0.1), rgba(52, 58, 64, 0.2));"><div class="flex items-center mb-4"><i class="fas fa-industry text-3xl text-gray-700 mr-3"></i><h2 class="text-2xl font-semibold">Kohlekraftwerke</h2></div><p class="mb-3"><span class="font-medium">Brennstoff:</span> Stein- oder Braunkohle</p><h3 class="text-lg font-medium mb-2">Funktionsweise:</h3><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-gray-600 mr-3 mt-1">1</div><p>Die Kohle wird zu feinem Staub gemahlen und in einem großen Kessel verbrannt.</p></div><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-gray-600 mr-3 mt-1">2</div><p>Durch die Hitze der Verbrennung wird Wasser in Rohren erhitzt, bis es zu heißem Wasserdampf wird.</p></div><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-gray-600 mr-3 mt-1">3</div><p>Der Wasserdampf strömt mit hohem Druck auf die Schaufeln einer Turbine und bringt diese zum Drehen.</p></div><div class="flex items-start mb-4"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-gray-600 mr-3 mt-1">4</div><p>Die Turbine ist mit einem Generator verbunden, der die Drehbewegung in elektrische Energie umwandelt.</p></div><div class="bg-gray-100 p-3 rounded-md"><p class="text-sm"><i class="fas fa-info-circle text-gray-700 mr-1"></i> <span class="font-medium">Abgase:</span> Bei der Verbrennung von Kohle entstehen Abgase, die gereinigt werden müssen. Die großen Türme, die man oft bei Kohlekraftwerken sieht, sind Kühltürme, aus denen Wasserdampf aufsteigt.</p></div></div><div class="content-box p-5" style="background: linear-gradient(to bottom right, rgba(0, 123, 255, 0.1), rgba(13, 202, 240, 0.2));"><div class="flex items-center mb-4"><i class="fas fa-burn text-3xl text-blue-500 mr-3"></i><h2 class="text-2xl font-semibold">Gaskraftwerke</h2></div><p class="mb-3"><span class="font-medium">Brennstoff:</span> Erdgas</p><h3 class="text-lg font-medium mb-2">Funktionsweise:</h3><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-cyan-400 mr-3 mt-1">1</div><p>Erdgas wird in einer Brennkammer verbrannt.</p></div><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-cyan-400 mr-3 mt-1">2</div><p>Die heißen Gase, die bei der Verbrennung entstehen, treiben direkt eine Gasturbine an (ähnlich wie ein Flugzeugtriebwerk).</p></div><div class="flex items-start mb-4"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-cyan-400 mr-3 mt-1">3</div><p>Die Gasturbine ist mit einem Generator gekoppelt, der die Drehbewegung in Strom umwandelt.</p></div><div class="bg-blue-50 p-3 rounded-md mb-3"><p class="text-sm"><i class="fas fa-lightbulb text-blue-500 mr-1"></i> <span class="font-medium">GuD-Kraftwerke:</span> Moderne Gaskraftwerke nutzen die heißen Abgase der Gasturbine, um zusätzlich Wasser zu verdampfen. Dieser Dampf treibt eine weitere Dampfturbine an. Das erhöht den Wirkungsgrad des Kraftwerks.</p></div><div class="bg-yellow-50 p-2 rounded-md"><p class="text-sm"><i class="fas fa-star text-yellow-500 mr-1"></i> Gaskraftwerke gelten als flexibler als Kohlekraftwerke und können schneller auf Strombedarf reagieren.</p></div></div></div><div class="mt-4 flex justify-center"><div class="relative"><img alt="Kohlekraftwerk mit Kühltürmen" class="rounded-md shadow-md" src="https://picture-search.skywork.ai/aippt/image/sheet/137b9b2d2ff5a8ba883d4aa385f4f8bd.jpg" style="height: 180px; object-fit: cover;"/><div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-center text-sm py-1">Kohlekraftwerk mit charakteristischen Kühltürmen</div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">4/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Kernkraftwerke: Energie aus Atomkernen</h1></div><div class="grid grid-cols-12 gap-6 h-5/6"><div class="col-span-7"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-4 text-blue-600">So funktioniert ein Kernkraftwerk:</h2><div class="space-y-5 mt-6"><div class="border-l-3 border-blue-500 pl-5 relative pb-4"><h3 class="text-xl font-medium mb-2">Kernspaltung</h3><p>Im Kernreaktor findet eine kontrollierte <span class="font-semibold">Kernspaltung</span> statt. Dabei werden Atomkerne von Uran gespalten, wodurch sehr viel Wärmeenergie freigesetzt wird.</p></div><div class="border-l-3 border-blue-500 pl-5 relative pb-4"><h3 class="text-xl font-medium mb-2">Wärmeerzeugung</h3><p>Diese Wärme wird genutzt, um Wasser zu erhitzen und Wasserdampf zu erzeugen.</p></div><div class="border-l-3 border-blue-500 pl-5 relative pb-4"><h3 class="text-xl font-medium mb-2">Turbine antreiben</h3><p>Der Wasserdampf treibt, ähnlich wie im Kohlekraftwerk, eine Turbine an, die sich schnell dreht.</p></div><div class="border-l-3 border-blue-500 pl-5 relative"><h3 class="text-xl font-medium mb-2">Stromerzeugung</h3><p>Die Turbine ist mit einem Generator verbunden, der die Drehbewegung in elektrische Energie (Strom) umwandelt.</p></div></div><div class="flex items-center mt-6 p-3 bg-blue-50 rounded-lg"><div class="mr-4 text-blue-500"><i class="fas fa-atom text-3xl"></i></div><div><h3 class="text-lg font-medium">Brennstoff:</h3><p>Meistens wird <span class="font-semibold">Uran</span> als Brennstoff verwendet</p></div></div></div></div><div class="col-span-5"><div class="content-box p-6 h-full flex flex-col"><div class="mb-5"><img alt="Kernkraftwerk mit Kühlturm" class="w-full h-48 object-cover rounded-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/89f8fdbe481e7973c5f7771ea1fffec2.jpg"/><p class="text-sm text-gray-500 mt-1 text-center">Kernkraftwerk mit charakteristischem Kühlturm</p></div><h3 class="text-xl font-semibold mb-3 text-blue-600">Besonderheiten:</h3><div class="space-y-4 flex-grow"><div class="bg-yellow-50 p-3 flex items-start rounded-lg"><div class="mr-3 text-green-500 mt-1"><i class="fas fa-check-circle"></i></div><div><p><span class="font-medium">Keine direkte CO₂-Emission</span> bei der Stromerzeugung, da keine Verbrennung stattfindet</p></div></div><div class="bg-yellow-50 p-3 flex items-start rounded-lg"><div class="mr-3 text-yellow-500 mt-1"><i class="fas fa-exclamation-triangle"></i></div><div><p><span class="font-medium">Radioaktiver Abfall</span> entsteht und muss sicher gelagert werden</p></div></div><div class="bg-yellow-50 p-3 flex items-start rounded-lg"><div class="mr-3 text-blue-500 mt-1"><i class="fas fa-bolt"></i></div><div><p><span class="font-medium">Hohe Energieausbeute</span>: Aus wenig Brennstoff wird viel Energie gewonnen</p></div></div><div class="bg-yellow-50 p-3 flex items-start rounded-lg"><div class="mr-3 text-purple-500 mt-1"><i class="fas fa-tachometer-alt"></i></div><div><p><span class="font-medium">Wirkungsgrad</span> liegt bei etwa 33-35%</p></div></div></div></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">5/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6" style="background: linear-gradient(90deg, #28a745 0%, #007bff 100%);"><h1 class="text-4xl font-bold text-white">Erneuerbare Energien: Wind & Sonne</h1></div><div class="grid grid-cols-2 gap-6"><div class="content-box p-5 border-t-4 border-blue-500"><div class="flex items-center mb-3"><i class="fas fa-wind text-3xl text-blue-500 mr-3"></i><h2 class="text-2xl font-semibold">Windkraftwerke</h2></div><div class="mb-4 h-48 overflow-hidden rounded-lg"><img alt="Windkraftanlagen" class="w-full h-full object-cover" src="https://picture-search.skywork.ai/aippt/image/sheet/9a46f7ed2c042c2d79e6251f4d86cf4a.jpg"/></div><p class="mb-3">Windkraftwerke wandeln die <span class="font-semibold">Bewegungsenergie des Windes</span> in elektrischen Strom um.</p><h3 class="text-lg font-medium mb-2">So funktioniert's:</h3><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-blue-500 mr-3 flex-shrink-0">1</div><p>Der Wind trifft auf die Rotorblätter des Windrads und bringt sie zum Drehen.</p></div><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-blue-500 mr-3 flex-shrink-0">2</div><p>Die Drehbewegung wird über eine Welle und oft ein Getriebe an einen Generator weitergeleitet.</p></div><div class="flex items-start mb-4"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-blue-500 mr-3 flex-shrink-0">3</div><p>Der Generator wandelt die mechanische Energie in elektrische Energie um.</p></div><div class="bg-blue-50 p-3 rounded-lg"><h3 class="font-medium">Wusstest du schon?</h3><ul class="list-disc ml-5"><li>Windräder können an Land (Onshore) oder im Meer (Offshore) stehen</li><li>Der Wirkungsgrad liegt bei etwa 35-45%</li></ul></div></div><div class="content-box p-5 border-t-4 border-yellow-400"><div class="flex items-center mb-3"><i class="fas fa-sun text-3xl text-yellow-500 mr-3"></i><h2 class="text-2xl font-semibold">Solarkraftwerke</h2></div><div class="mb-4 h-48 overflow-hidden rounded-lg"><img alt="Solaranlage" class="w-full h-full object-cover" src="https://picture-search.skywork.ai/aippt/image/sheet/81a1abd0d777ee8b043690055c1ed74b.jpg"/></div><p class="mb-3">Solarkraftwerke nutzen die <span class="font-semibold">Energie der Sonnenstrahlung</span>, um Strom zu erzeugen.</p><h3 class="text-lg font-medium mb-2">So funktioniert's (Photovoltaik):</h3><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-yellow-500 mr-3 flex-shrink-0">1</div><p>Solarzellen wandeln Sonnenlicht direkt in elektrische Energie (Gleichstrom) um.</p></div><div class="flex items-start mb-2"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-yellow-500 mr-3 flex-shrink-0">2</div><p>Ein Wechselrichter wandelt den erzeugten Gleichstrom in Wechselstrom um.</p></div><div class="flex items-start mb-4"><div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-white bg-yellow-500 mr-3 flex-shrink-0">3</div><p>Der Strom kann ins Netz eingespeist oder direkt genutzt werden.</p></div><div class="bg-yellow-50 p-3 rounded-lg"><h3 class="font-medium">Wusstest du schon?</h3><ul class="list-disc ml-5"><li>Es gibt auch solarthermische Kraftwerke mit Spiegeln, die Sonnenlicht bündeln</li><li>Der Wirkungsgrad von Solarzellen liegt bei etwa 15-22%</li></ul></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">6/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Wasserkraft: Strom aus fließendem Wasser</h1></div><div class="grid grid-cols-12 gap-6 h-5/6"><div class="col-span-7"><div class="content-box p-6 h-full flex flex-col"><div class="mb-4"><h2 class="text-2xl font-semibold mb-3 text-blue-600"><i class="fas fa-water mr-2"></i>So funktioniert ein Wasserkraftwerk:</h2><div class="flex items-start mb-3"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold mr-3">1</div><p class="text-lg">Wasser wird durch Rohre oder Kanäle zu einer Turbine geleitet. Bei Speicherkraftwerken wird Wasser oft durch einen Damm aufgestaut.</p></div><div class="flex items-start mb-3"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold mr-3">2</div><p class="text-lg">Die Kraft des strömenden Wassers trifft auf die Schaufeln der Turbine und bringt sie zum Drehen.</p></div><div class="flex items-start mb-5"><div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold mr-3">3</div><p class="text-lg">Die Turbine treibt einen Generator an, der die mechanische Energie in elektrische Energie umwandelt.</p></div></div><div class="mb-4"><h2 class="text-2xl font-semibold mb-3 text-blue-600"><i class="fas fa-th-list mr-2"></i>Arten von Wasserkraftwerken:</h2><div class="grid grid-cols-2 gap-4"><div class="border-l-4 border-yellow-400 bg-yellow-50 p-4"><h3 class="text-xl font-medium mb-2">Laufwasserkraftwerke</h3><p>Nutzen die natürliche Strömung eines Flusses, ohne das Wasser in großen Mengen zu speichern.</p></div><div class="border-l-4 border-yellow-400 bg-yellow-50 p-4"><h3 class="text-xl font-medium mb-2">Speicherkraftwerke</h3><p>Nutzen aufgestautes Wasser, das durch Dämme zurückgehalten wird und bei Bedarf Strom erzeugen kann.</p></div></div></div><div class="mt-auto bg-blue-50 p-4 rounded-lg border border-blue-200 flex items-center"><i class="fas fa-bolt text-3xl text-yellow-500 mr-4"></i><div><h3 class="text-xl font-medium mb-1">Hoher Wirkungsgrad</h3><p class="text-lg">Wasserkraftwerke können bis zu <span class="font-bold text-blue-600">90%</span> der Wasserenergie in Strom umwandeln - sie gehören damit zu den effizientesten Kraftwerken!</p></div></div></div></div><div class="col-span-5"><div class="content-box p-6 h-full flex flex-col"><div class="mb-6"><img alt="Wasserkraftwerk mit Staudamm" class="w-full h-64 object-cover rounded-lg shadow-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/048e970c028019b1b2ac5cdad246e2a7.jpg"/></div><div class="bg-green-50 p-4 rounded-lg border border-green-200 mb-4"><h3 class="text-xl font-medium mb-2 text-green-700"><i class="fas fa-leaf mr-2"></i>Energiequelle:</h3><ul class="list-disc pl-6 space-y-2"><li>Bewegungsenergie (kinetische Energie) des fließenden Wassers</li><li>Lageenergie (potenzielle Energie) von gestautem Wasser</li></ul></div><div class="mt-auto"><h3 class="text-xl font-medium mb-2 text-blue-600"><i class="fas fa-plus-circle mr-2"></i>Vorteile:</h3><ul class="space-y-2"><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Erneuerbare Energiequelle</span></li><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Keine CO₂-Emissionen im Betrieb</span></li><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Langlebige und zuverlässige Anlagen</span></li></ul></div></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">7/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Energieumwandlung: Von der Quelle zum Strom</h1></div><div class="grid grid-cols-12 gap-6"><div class="col-span-5"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-4 text-blue-600">Was ist Energieumwandlung?</h2><p class="text-lg mb-4">Kraftwerke sind riesige Energie-Umwandlungs-Maschinen. Sie erzeugen Energie nicht neu, sondern wandeln eine Energieform in eine andere um.</p><div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6"><p class="text-lg">Am Ende jeder Umwandlungskette steht immer <span class="font-bold">elektrische Energie</span> (Strom), die wir für unsere Geräte nutzen können.</p></div><h3 class="text-xl font-medium mb-2 text-gray-700">Energieumwandlung ist wie eine Kette:</h3><p class="text-lg mb-6">Bei jeder Umwandlung geht etwas Energie verloren, meist als Wärme. Deshalb kann nie die gesamte Ausgangsenergie in Strom umgewandelt werden.</p><div class="bg-yellow-50 border-l-4 border-yellow-500 p-4"><h3 class="text-lg font-medium mb-1">Wusstest du schon?</h3><p>Wie gut ein Kraftwerk Energie umwandeln kann, nennt man <span class="font-semibold">Wirkungsgrad</span>. Ein hoher Wirkungsgrad bedeutet: viel Strom aus wenig Brennstoff!</p></div></div></div><div class="col-span-7"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-6 text-center">Beispiel: Energieumwandlung im Kohlekraftwerk</h2><div class="flex flex-wrap justify-center items-center mb-8"><div class="flex flex-col items-center mx-2 w-32"><div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl bg-gray-700"><i class="fas fa-cubes"></i></div><p class="text-center mt-2 font-medium">Chemische Energie</p><p class="text-center text-sm">(Kohle)</p></div><div class="text-yellow-400 text-2xl mx-1"><i class="fas fa-long-arrow-alt-right"></i></div><div class="flex flex-col items-center mx-2 w-32"><div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl bg-red-600"><i class="fas fa-fire"></i></div><p class="text-center mt-2 font-medium">Wärmeenergie</p><p class="text-center text-sm">(Verbrennung)</p></div><div class="text-yellow-400 text-2xl mx-1"><i class="fas fa-long-arrow-alt-right"></i></div><div class="flex flex-col items-center mx-2 w-32"><div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl bg-blue-500"><i class="fas fa-wind"></i></div><p class="text-center mt-2 font-medium">Bewegungsenergie</p<p class="text-center text-sm">(Dampfturbine)</p></div><div class="text-yellow-400 text-2xl mx-1"><i class="fas fa-long-arrow-alt-right"></i></div><div class="flex flex-col items-center mx-2 w-32"><div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl bg-yellow-500"><i class="fas fa-bolt"></i></div><p class="text-center mt-2 font-medium">Elektrische Energie</p><p class="text-center text-sm">(Generator)</p></div></div><div class="grid grid-cols-2 gap-6"><div class="bg-blue-50 p-4 rounded-lg"><h3 class="text-lg font-medium mb-2 flex items-center"><i class="fas fa-fan text-blue-500 mr-2"></i>Windkraftwerk</h3><p class="pl-6"><span class="font-medium">Wind</span> → <span class="font-medium">Rotordrehung</span> → <span class="font-medium">Strom</span></p></div><div class="bg-yellow-50 p-4 rounded-lg"><h3 class="text-lg font-medium mb-2 flex items-center"><i class="fas fa-sun text-yellow-500 mr-2"></i>Solarkraftwerk (PV)</h3><p class="pl-6"><span class="font-medium">Sonnenlicht</span> → <span class="font-medium">Direkt zu Strom</span></p></div><div class="bg-blue-100 p-4 rounded-lg"><h3 class="text-lg font-medium mb-2 flex items-center"><i class="fas fa-water text-blue-600 mr-2"></i>Wasserkraftwerk</h3><p class="pl-6"><span class="font-medium">Fließendes Wasser</span> → <span class="font-medium">Turbinendrehung</span> → <span class="font-medium">Strom</span></p></div><div class="bg-green-50 p-4 rounded-lg"><h3 class="text-lg font-medium mb-2 flex items-center"><i class="fas fa-atom text-green-600 mr-2"></i>Kernkraftwerk</h3><p class="pl-6"><span class="font-medium">Kernspaltung</span> → <span class="font-medium">Wärme</span> → <span class="font-medium">Dampf</span> → <span class="font-medium">Strom</span></p></div></div></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">8/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Wirkungsgrad im Vergleich</h1></div><div class="grid grid-cols-12 gap-6"><div class="col-span-5"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-4 text-blue-600">Was ist der Wirkungsgrad?</h2><p class="text-lg mb-6">Der Wirkungsgrad gibt an, wie gut ein Kraftwerk die ursprüngliche Energie in Strom umwandeln kann.</p><div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6"><p class="flex items-center"><i class="fas fa-lightbulb text-yellow-500 text-xl mr-3"></i><span class="text-lg">Ein hoher Wirkungsgrad bedeutet, dass viel von der ursprünglichen Energie zu Strom wird und wenig verloren geht.</span></p></div><div class="mt-6"><h3 class="text-xl font-medium mb-3">Einfaches Beispiel:</h3><p class="mb-2"><i class="fas fa-arrow-right text-green-500 mr-2"></i>Bei 45% Wirkungsgrad werden aus 100 Teilen Energie nur 45 Teile Strom.</p><p><i class="fas fa-arrow-right text-green-500 mr-2"></i>Der Rest (55 Teile) geht meist als Wärme verloren.</p></div><div class="mt-8 bg-blue-50 p-4 rounded-lg"><h3 class="text-xl font-medium mb-2 flex items-center"><i class="fas fa-info-circle text-blue-500 mr-2"></i>Warum ist der Wirkungsgrad wichtig?</h3><ul class="list-disc pl-6"><li class="mb-1">Spart Brennstoffe (z.B. Kohle, Gas)</li><li class="mb-1">Schont die Umwelt</li><li>Macht Strom günstiger</li></ul></div></div></div><div class="col-span-7"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-5 text-center">Wirkungsgrad verschiedener Kraftwerkstypen</h2><div class="mb-4" id="chart-wirkungsgrad" style="height: 280px;"></div><div class="mt-6"><table class="min-w-full bg-white border border-gray-200"><thead><tr class="bg-gray-100"><th class="py-2 px-4 border-b text-left">Kraftwerkstyp</th><th class="py-2 px-4 border-b text-center">Wirkungsgrad</th><th class="py-2 px-4 border-b text-left">Einfache Erklärung</th></tr></thead><tbody><tr><td class="py-2 px-4 border-b font-medium">Wasserkraftwerk</td><td class="py-2 px-4 border-b text-center">bis zu 90%</td><td class="py-2 px-4 border-b">Spitzenreiter! Fast die gesamte Energie wird zu Strom.</td></tr><tr class="bg-gray-50"><td class="py-2 px-4 border-b font-medium">Gaskraftwerk (GuD)</td><td class="py-2 px-4 border-b text-center">bis zu 60%</td><td class="py-2 px-4 border-b">Ziemlich gut! Mehr als die Hälfte wird zu Strom.</td></tr><tr><td class="py-2 px-4 border-b font-medium">Kohlekraftwerk</td><td class="py-2 px-4 border-b text-center">bis zu 45%</td><td class="py-2 px-4 border-b">Weniger als die Hälfte wird zu Strom.</td></tr><tr class="bg-gray-50"><td class="py-2 px-4 border-b font-medium">Solarkraftwerk (PV)</td><td class="py-2 px-4 border-b text-center">ca. 15-22%</td><td class="py-2 px-4 border-b">Nur ein kleiner Teil des Sonnenlichts wird zu Strom.</td></tr></tbody></table></div></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">9/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Umweltaspekte: CO₂-Emissionen</h1></div><div class="grid grid-cols-12 gap-6"><div class="col-span-5"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-4 text-gray-800">Was ist CO₂ und warum ist es wichtig?</h2><div class="mb-5 bg-blue-50 p-4 rounded-lg"><div class="flex items-start"><div class="mr-3 text-blue-500"><i class="fas fa-info-circle text-2xl"></i></div><p class="text-lg">Kohlendioxid (CO₂) ist ein Treibhausgas, das wie ein Glasdach Wärme auf der Erde zurückhält.</p></div></div><ul class="space-y-4 mb-6"><li class="flex items-start"><i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i><p>Natürlicher Treibhauseffekt: Gut für unser Leben auf der Erde</p></li><li class="flex items-start"><i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i><p>Zu viel CO₂: Verstärkt den Treibhauseffekt und führt zum Klimawandel</p></li><li class="flex items-start"><i class="fas fa-bolt text-red-500 mt-1 mr-3"></i><p>Folgen: Häufigere Extremwetterereignisse, Temperaturanstieg, Meeresspiegelanstieg</p></li></ul><div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400"><h3 class="text-lg font-medium mb-2">Wichtig zu wissen:</h3><p>Bei erneuerbaren Energien entstehen CO₂-Emissionen hauptsächlich bei der Herstellung und dem Bau, kaum im Betrieb.</p></div></div></div><div class="col-span-7"><div class="content-box p-6 h-full"><h2 class="text-2xl font-semibold mb-4 text-center text-gray-800">CO₂-Emissionen verschiedener Kraftwerkstypen</h2><p class="text-center text-gray-600 mb-4">Gramm CO₂ pro Kilowattstunde (g/kWh)</p><div class="w-full h-96" id="chart-co2"></div><div class="mt-4 bg-gray-50 p-4 rounded-lg"><p class="text-center text-gray-700"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Um den Klimawandel zu bekämpfen, ist es wichtig, den Anteil an Energiequellen mit geringen CO₂-Emissionen zu erhöhen.</p></div></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">10/12</span></div></div>
-    <div class="slide p-6"><div class="title-bar py-3 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Vor- und Nachteile verschiedener Kraftwerkstypen</h1></div><div class="grid grid-cols-4 gap-4 h-5/6"><div class="card flex flex-col"><div class="card-header bg-gray-700 text-white"><div class="flex items-center"><i class="fas fa-fire text-yellow-400 mr-2"></i><h2 class="text-lg font-bold">Kohlekraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Große heimische Vorkommen</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Günstiger Abbau und Betrieb</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Grundlastfähig</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Sehr hohe CO₂-Emissionen</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Ausstoß von Schadstoffen</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Landschaftszerstörung (Tagebau)</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Endlicher Rohstoff</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-blue-800 text-white"><div class="flex items-center"><i class="fas fa-burn text-blue-300 mr-2"></i><h2 class="text-lg font-bold">Gaskraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Geringere CO₂-Emissionen als Kohle</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Flexibel, schnell regelbar</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Hoher Wirkungsgrad (bis 60%)</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Immer noch CO₂-Emissionen</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Endlicher Rohstoff</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Importabhängigkeit</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-purple-700 text-white"><div class="flex items-center"><i class="fas fa-atom text-purple-300 mr-2"></i><h2 class="text-lg font-bold">Kernkraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Sehr geringe CO₂-Emissionen</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Zuverlässige Stromlieferung</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Hohe Energiemenge aus wenig Brennstoff</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Gefährlicher Atommüll</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Ungelöste Endlagerfrage</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Risiko schwerer Unfälle</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-blue-600 text-white"><div class="flex items-center"><i class="fas fa-water text-blue-200 mr-2"></i><h2 class="text-lg font-bold">Wasserkraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Keine CO₂-Emissionen im Betrieb</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Erneuerbare Energiequelle</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Hoher Wirkungsgrad (bis 90%)</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Eingriffe in Natur und Landschaft</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Beeinträchtigung von Fischwanderungen</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Abhängig von Wassermenge</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-teal-600 text-white"><div class="flex items-center"><i class="fas fa-wind text-teal-200 mr-2"></i><h2 class="text-lg font-bold">Windkraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Keine CO₂-Emissionen im Betrieb</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Erneuerbare Energiequelle</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Geringe Betriebskosten</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Windabhängig (kein Wind = kein Strom)</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Beeinträchtigung des Landschaftsbildes</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Gefahr für Vögel und Fledermäuse</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-yellow-600 text-white"><div class="flex items-center"><i class="fas fa-sun text-yellow-300 mr-2"></i><h2 class="text-lg font-bold">Solarkraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Keine CO₂-Emissionen im Betrieb</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Erneuerbare Energiequelle</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Dezentral nutzbar (z.B. auf Dächern)</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Sonnenlichtabhängig (Tag/Nacht, Wetter)</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Benötigt Speicher</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Energieintensive Herstellung</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-green-700 text-white"><div class="flex items-center"><i class="fas fa-leaf text-green-300 mr-2"></i><h2 class="text-lg font-bold">Biomassekraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Erneuerbare Energiequelle</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>CO₂-neutral bei nachhaltiger Nutzung</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Speicherbar und flexibel einsetzbar</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Benötigt große Anbauflächen</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>"Tank oder Teller"-Problem</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Emission von Feinstaub bei Verbrennung</span></li></ul></div></div><div class="card flex flex-col"><div class="card-header bg-red-700 text-white"><div class="flex items-center"><i class="fas fa-mountain text-red-300 mr-2"></i><h2 class="text-lg font-bold">Geothermiekraftwerke</h2></div></div><div class="p-3 flex-grow"><h3 class="text-sm font-bold text-green-600 mb-2"><i class="fas fa-plus-circle mr-1"></i> Vorteile:</h3><ul class="mb-3"><li><i class="fas fa-check text-green-500 mr-1"></i><span>Keine CO₂-Emissionen im Betrieb</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Unabhängig von Wetter und Tageszeit</span></li><li><i class="fas fa-check text-green-500 mr-1"></i><span>Geringer Flächenbedarf</span></li></ul><h3 class="text-sm font-bold text-red-600 mb-2"><i class="fas fa-minus-circle mr-1"></i> Nachteile:</h3><ul><li><i class="fas fa-times text-red-500 mr-1"></i><span>Hohe Erschließungskosten</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Nur an bestimmten Standorten sinnvoll</span></li><li><i class="fas fa-times text-red-500 mr-1"></i><span>Risiko seismischer Aktivitäten</span></li></ul></div></div></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">11/12</span></div></div>
-    <div class="slide p-8"><div class="title-bar py-4 px-8 rounded-lg mb-6"><h1 class="text-4xl font-bold text-white">Die Zukunft unserer Energieversorgung</h1></div><div class="grid grid-cols-12 gap-6"><div class="col-span-5"><div class="content-box p-4 mb-4"><img alt="Windpark" class="w-full h-48 object-cover rounded-lg mb-4" src="https://picture-search.skywork.ai/aippt/image/sheet/39c4f67493b5732b5ef3bba7746fa9e3.jpg"/><div class="p-4 rounded-lg" style="background: linear-gradient(135deg, rgba(40,167,69,0.15) 0%, rgba(0,123,255,0.15) 100%); border-left: 4px solid #28a745;"><h2 class="text-2xl font-semibold text-green-700 mb-2">Unser Weg zu einer sauberen Zukunft</h2><p class="text-lg">Die Zukunft unserer Energieversorgung liegt in erneuerbaren Energien wie Sonne, Wind und Wasser.</p></div></div><div class="content-box p-5"><h3 class="text-xl font-semibold mb-3 text-blue-600">Warum ist das wichtig?</h3><ul class="space-y-2"><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Schutz unseres Klimas und der Umwelt</span></li><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Unerschöpfliche Energiequellen</span></li><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Deutlich weniger CO₂-Emissionen</span></li><li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-2"></i><span>Neue Technologien und Arbeitsplätze</span></li></ul></div></div><div class="col-span-7"><div class="grid grid-cols-2 gap-4 mb-4"><div class="future-card p-4"><div class="flex items-center mb-3"><div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl text-yellow-500 bg-yellow-100 mr-3"><i class="fas fa-sun"></i></div><h3 class="text-xl font-semibold">Solarenergie</h3></div><p>Nutzt die unendliche Kraft der Sonne und kann dezentral auf Dächern oder in großen Solarparks erzeugt werden.</p></div><div class="future-card p-4"><div class="flex items-center mb-3"><div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl text-blue-400 bg-blue-100 mr-3"><i class="fas fa-wind"></i></div><h3 class="text-xl font-semibold">Windenergie</h3></div><p>Windkraftanlagen an Land und auf See liefern sauberen Strom und werden immer effizienter.</p></div></div><div class="grid grid-cols-2 gap-4 mb-4"><div class="future-card p-4"><div class="flex items-center mb-3"><div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl text-blue-600 bg-blue-100 mr-3"><i class="fas fa-water"></i></div><h3 class="text-xl font-semibold">Wasserkraft</h3></div><p>Eine der ältesten und zuverlässigsten erneuerbaren Energiequellen mit sehr hohem Wirkungsgrad.</p></div><div class="future-card p-4"><div class="flex items-center mb-3"><div class="w-16 h-16 rounded-full flex items-center justify-center text-3xl text-gray-600 bg-gray-200 mr-3"><i class="fas fa-battery-full"></i></div><h3 class="text-xl font-semibold">Energiespeicher</h3></div><p>Speichertechnologien werden immer besser und helfen, erneuerbare Energie auch bei Flaute oder Dunkelheit zu nutzen.</p></div></div><div class="content-box p-5 bg-blue-50"><h3 class="text-xl font-semibold mb-2 text-blue-700">Was können wir tun?</h3><p class="text-lg mb-3">Der Wandel zu erneuerbaren Energien ist bereits im Gang. Jeder von uns kann dazu beitragen:</p><div class="flex items-center justify-around"><div class="text-center"><div class="mx-auto mb-2 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-lightbulb text-green-600 text-xl"></i></div><p class="text-sm">Energie sparen</p></div><div class="text-center"><div class="mx-auto mb-2 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-solar-panel text-green-600 text-xl"></i></div><p class="text-sm">Erneuerbare unterstützen</p></div><div class="text-center"><div class="mx-auto mb-2 w-12 h-12 rounded-full bg-green-100 flex items-center justify-center"><i class="fas fa-recycle text-green-600 text-xl"></i></div><p class="text-sm">Nachhaltig leben</p></div></div></div></div></div><div class="absolute bottom-16 left-0 right-0 text-center"><p class="text-xl font-medium">Vielen Dank für eure Aufmerksamkeit!</p></div><div class="absolute bottom-4 right-8"><span class="text-lg font-medium text-gray-600">12/12</span></div></div>
-</div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('presentation-container');
-    const slides = document.querySelectorAll('.slide');
-    const prevButton = document.getElementById('prev');
-    const nextButton = document.getElementById('next');
-    let currentSlide = 0;
-    let touchStartX = 0;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevButton = document.getElementById('prev');
+            const nextButton = document.getElementById('next');
+            const slideCounter = document.getElementById('slide-counter');
+            const progressBar = document.getElementById('progress-bar');
+            const presentationContainer = document.getElementById('presentation-container');
+            let currentSlide = 0;
 
-    function showSlide(index) {
-        // Findet die aktuell aktive Folie und entfernt die 'active' Klasse
-        const currentActive = document.querySelector('.slide.active');
-        if (currentActive) {
-            currentActive.classList.remove('active');
-        }
-        
-        // Fügt die 'active' Klasse zur neuen Folie hinzu
-        slides[index].classList.add('active');
-        currentSlide = index;
-    }
+            const totalSlides = slides.length;
 
-    function nextSlide() {
-        let nextIndex = (currentSlide + 1) % slides.length;
-        showSlide(nextIndex);
-    }
+            function updateSlide() {
+                slides.forEach((slide, index) => {
+                    if (index === currentSlide) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
+                progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
+            }
 
-    function prevSlide() {
-        let prevIndex = (currentSlide - 1 + slides.length) % slides.length;
-        showSlide(prevIndex);
-    }
+            function nextSlide() {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                updateSlide();
+            }
 
-    // Event-Listener für Buttons und Tasten
-    prevButton.addEventListener('click', prevSlide);
-    nextButton.addEventListener('click', nextSlide);
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'ArrowRight' || event.key === ' ') {
-            event.preventDefault();
-            nextSlide();
-        } else if (event.key === 'ArrowLeft') {
-            event.preventDefault();
-            prevSlide();
-        }
-    });
+            function prevSlide() {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                updateSlide();
+            }
 
-    // Event-Listener für Wischgesten (Swipe)
-    container.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-    }, { passive: true });
+            nextButton.addEventListener('click', nextSlide);
+            prevButton.addEventListener('click', prevSlide);
 
-    container.addEventListener('touchend', (e) => {
-        let touchEndX = e.changedTouches[0].clientX;
-        if (touchStartX - touchEndX > 50) { // Nach links wischen
-            nextSlide();
-        } else if (touchEndX - touchStartX > 50) { // Nach rechts wischen
-            prevSlide();
-        }
-    }, { passive: true });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    prevSlide();
+                }
+            });
+            
+            function resizePresentation() {
+                const containerWidth = presentationContainer.parentElement.clientWidth;
+                const containerHeight = presentationContainer.parentElement.clientHeight;
+                const scaleX = containerWidth / 1280;
+                const scaleY = containerHeight / 720;
+                const scale = Math.min(scaleX, scaleY);
+                presentationContainer.style.setProperty('--scale', scale);
+                 presentationContainer.style.left = `${(containerWidth - 1280 * scale) / 2}px`;
+                presentationContainer.style.top = `${(containerHeight - 720 * scale) / 2}px`;
+            }
 
-    // Skalierungslogik für responsive Darstellung
-    function scalePresentation() {
-        const slideWidth = 1280;
-        const slideHeight = 720;
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-        const scale = Math.min(windowWidth / slideWidth, windowHeight / slideHeight);
-        
-        container.style.transform = `scale(${scale})`;
-    }
-
-    window.addEventListener('resize', scalePresentation);
-    scalePresentation();
-    showSlide(0); // Initial die erste Folie anzeigen
-
-    // D3.js Charts (unverändert)
-    if(typeof d3!=='undefined'){const t=document.getElementById("chart-wirkungsgrad");if(t){const e=[{type:"Wasserkraftwerk",value:90,color:"#3498db"},{type:"Gaskraftwerk (GuD)",value:60,color:"#e67e22"},{type:"Kohlekraftwerk",value:45,color:"#7f8c8d"},{type:"Solarkraftwerk (PV)",value:22,color:"#f1c40f"}];e.sort((t,e)=>e.value-t.value);const a={top:20,right:30,bottom:40,left:160},l=t.clientWidth-a.left-a.right,n=t.clientHeight-a.top-a.bottom,r=d3.select("#chart-wirkungsgrad").append("svg").attr("width","100%").attr("height","100%").attr("viewBox",`0 0 ${t.clientWidth} ${t.clientHeight}`).append("g").attr("transform",`translate(${a.left},${a.top})`),o=d3.scaleLinear().domain([0,100]).range([0,l]),i=d3.scaleBand().domain(e.map(t=>t.type)).range([0,n]).padding(.3);r.append("g").call(d3.axisLeft(i)).selectAll("text").style("font-size","14px"),r.append("g").attr("transform",`translate(0,${n})`).call(d3.axisBottom(o).ticks(5).tickFormat(t=>t+"%")),r.selectAll(".bar").data(e).enter().append("rect").attr("class","bar").attr("y",t=>i(t.type)).attr("height",i.bandwidth()).attr("x",0).attr("width",0).attr("fill",t=>t.color).transition().duration(800).delay((t,e)=>100*e).attr("width",t=>o(t.value))}const e=document.getElementById("chart-co2");if(e){const t=[{type:"Kohlekraftwerk",value:820,color:"#dc3545"},{type:"Gaskraftwerk",value:490,color:"#fd7e14"},{type:"Solarkraftwerk (PV)",value:48,color:"#ffc107"},{type:"Windkraftwerk",value:11,color:"#28a745"},{type:"Wasserkraftwerk",value:4,color:"#007bff"}];t.sort((t,e)=>e.value-t.value);const a={top:20,right:40,bottom:40,left:160},l=e.clientWidth-a.left-a.right,n=e.clientHeight-a.top-a.bottom,r=d3.select("#chart-co2").append("svg").attr("width","100%").attr("height","100%").attr("viewBox",`0 0 ${e.clientWidth} ${e.clientHeight}`).append("g").attr("transform",`translate(${a.left},${a.top})`),o=d3.scaleLinear().domain([0,d3.max(t,t=>t.value)]).range([0,l]),i=d3.scaleBand().domain(t.map(t=>t.type)).range([0,n]).padding(.3);r.append("g").call(d3.axisLeft(i)).selectAll("text").style("font-size","14px"),r.append("g").attr("transform",`translate(0,${n})`).call(d3.axisBottom(o).ticks(5)),r.append("text").attr("text-anchor","middle").attr("x",l/2).attr("y",n+a.bottom-5).text("g CO₂/kWh"),r.selectAll(".bar").data(t).enter().append("rect").attr("x",0).attr("y",t=>i(t.type)).attr("height",i.bandwidth()).attr("fill",t=>t.color).attr("width",0).transition().duration(800).delay((t,e)=>100*e).attr("width",t=>o(t.value)),r.selectAll(".label").data(t).enter().append("text").attr("class","label").attr("y",t=>i(t.type)+i.bandwidth()/2+5).attr("x",t=>o(t.value)+5).text(t=>t.value).style("font-weight","bold")}}
-});
-</script>
-
+            window.addEventListener('resize', resizePresentation);
+            resizePresentation();
+            updateSlide();
+        });
+    </script>
 </body>
 </html>
