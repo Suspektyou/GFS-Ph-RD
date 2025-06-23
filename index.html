@@ -92,13 +92,13 @@
             padding: 1.5rem; /* p-6 */
         }
 
-        /* Specific styles for page_2.html */
-        .slide-2 .energy-flow-arrow {
+        /* Specific styles for slide with energy flow (now slide-3) */
+        .slide-3 .energy-flow-arrow {
             position: relative;
             height: 2px;
             background-color: #f59e0b;
         }
-        .slide-2 .energy-flow-arrow::after {
+        .slide-3 .energy-flow-arrow::after {
             content: '';
             position: absolute;
             right: 0;
@@ -109,15 +109,15 @@
             border-top: 5px solid transparent;
             border-bottom: 5px solid transparent;
         }
-        .slide-2 .type-card {
+        .slide-3 .type-card {
             transition: all 0.3s ease;
         }
-        .slide-2 .type-card:hover {
+        .slide-3 .type-card:hover {
             transform: translateY(-5px);
         }
 
-        /* Specific styles for page_3.html */
-        .slide-3 .energy-icon {
+        /* Specific styles for energy conservation (now slide-4) */
+        .slide-4 .energy-icon {
             height: 70px;
             width: 70px;
             display: flex;
@@ -125,13 +125,13 @@
             justify-content: center;
             border-radius: 50%;
         }
-        .slide-3 .energy-arrow {
+        .slide-4 .energy-arrow {
             position: relative;
             height: 3px;
             background-color: #f59e0b;
             width: 100%;
         }
-        .slide-3 .energy-arrow::after {
+        .slide-4 .energy-arrow::after {
             content: '';
             position: absolute;
             right: 0;
@@ -142,16 +142,16 @@
             border-top: 5px solid transparent;
             border-bottom: 5px solid transparent;
         }
-        .slide-3 .highlight-text {
+        .slide-4 .highlight-text {
             text-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
         }
-        .slide-3 .circular-flow {
+        .slide-4 .circular-flow {
             position: relative;
             width: 60%; /* Made responsive */
             padding-bottom: 60%; /* Maintain aspect ratio (1:1) */
             margin: 0 auto;
         }
-        .slide-3 .circular-flow::before {
+        .slide-4 .circular-flow::before {
             content: '';
             position: absolute;
             top: 0;
@@ -162,35 +162,35 @@
             border-radius: 50%;
             animation: rotate 20s linear infinite;
         }
-        .slide-3 .circular-flow > div { /* Adjust child positioning within responsive circle */
+        .slide-4 .circular-flow > div { /* Adjust child positioning within responsive circle */
             position: absolute;
             transform: translate(-50%, -50%);
         }
-        .slide-3 .circular-flow > div:nth-child(1) { top: 0; left: 50%; } /* Solarenergie */
-        .slide-3 .circular-flow > div:nth-child(2) { top: 50%; right: 0; transform: translate(50%, -50%); } /* Chemische Energie */
-        .slide-3 .circular-flow > div:nth-child(3) { bottom: 0; left: 50%; transform: translate(-50%, 50%); } /* Potentielle Energie */
-        .slide-3 .circular-flow > div:nth-child(4) { top: 50%; left: 0; } /* Wärmeenergie */
-        .slide-3 .circular-flow > div:nth-child(5) { top: 50%; left: 50%; } /* Center Element */
+        .slide-4 .circular-flow > div:nth-child(1) { top: 0; left: 50%; } /* Solarenergie */
+        .slide-4 .circular-flow > div:nth-child(2) { top: 50%; right: 0; transform: translate(50%, -50%); } /* Chemische Energie */
+        .slide-4 .circular-flow > div:nth-child(3) { bottom: 0; left: 50%; transform: translate(-50%, 50%); } /* Potentielle Energie */
+        .slide-4 .circular-flow > div:nth-child(4) { top: 50%; left: 0; } /* Wärmeenergie */
+        .slide-4 .circular-flow > div:nth-child(5) { top: 50%; left: 50%; } /* Center Element */
 
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* Specific styles for page_4.html */
-        .slide-4 .process-step {
+        /* Specific styles for conventional power plants (now slide-5) */
+        .slide-5 .process-step {
             position: relative;
             transition: all 0.3s ease;
         }
-        .slide-4 .process-step:hover {
+        .slide-5 .process-step:hover {
             transform: translateY(-5px);
         }
-        .slide-4 .process-arrow {
+        .slide-5 .process-arrow {
             position: relative;
             height: 2px;
             background-color: #f59e0b;
         }
-        .slide-4 .process-arrow::after {
+        .slide-5 .process-arrow::after {
             content: '';
             position: absolute;
             right: 0;
@@ -201,14 +201,14 @@
             border-top: 5px solid transparent;
             border-bottom: 5px solid transparent;
         }
-        .slide-4 .key-point {
+        .slide-5 .key-point {
             border-left: 3px solid #3b82f6;
             transition: all 0.2s ease;
         }
-        .slide-4 .key-point:hover {
+        .slide-5 .key-point:hover {
             background-color: rgba(59, 130, 246, 0.2);
         }
-        .slide-4 .video-container {
+        .slide-5 .video-container {
             position: relative;
             padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
             height: 0;
@@ -216,7 +216,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             overflow: hidden; /* Ensures rounded corners on iframe */
         }
-        .slide-4 .video-container iframe {
+        .slide-5 .video-container iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -226,8 +226,8 @@
         }
 
 
-        /* Specific styles for page_5.html (Nuclear) */
-        .slide-5 .atom-pulse {
+        /* Specific styles for nuclear power plants (now slide-6) */
+        .slide-6 .atom-pulse {
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
@@ -244,46 +244,45 @@
                 opacity: 1;
             }
         }
-        .slide-5 .glow {
+        .slide-6 .glow {
             filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.8));
         }
-        /* New styles for responsive chain reaction diagram */
-        .slide-5 .chain-reaction-diagram {
+        .slide-6 .chain-reaction-diagram {
             position: relative;
             width: 100%; /* Make it fill its parent */
             padding-bottom: 60%; /* Maintain aspect ratio */
             height: 0; /* Important for padding-bottom trick */
         }
 
-        .slide-5 .chain-reaction-diagram > div {
+        .slide-6 .chain-reaction-diagram > div {
             position: absolute;
             transform: translate(-50%, -50%); /* Adjust for center alignment */
             white-space: nowrap; /* Prevent text wrapping */
         }
 
-        .slide-5 .chain-reaction-diagram .uranium-atom { top: 50%; left: 20%; }
-        .slide-5 .chain-reaction-diagram .neutron-arrow { top: 50%; left: 30%; }
-        .slide-5 .chain-reaction-diagram .fission-product-top { top: 25%; left: 45%; }
-        .slide-5 .chain-reaction-diagram .fission-product-bottom { top: 75%; left: 45%; }
-        .slide-5 .chain-reaction-diagram .energy-release { top: 50%; left: 55%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .released-neutron-top { top: 33%; left: 70%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .released-neutron-middle { top: 50%; left: 70%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .released-neutron-bottom { top: 67%; left: 70%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .continuation-arrow-top { top: 33%; left: 80%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .continuation-arrow-middle { top: 50%; left: 80%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .continuation-arrow-bottom { top: 67%; left: 80%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .next-uranium-top { top: 33%; left: 90%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .next-uranium-middle { top: 50%; left: 90%; } /* Adjusted left */
-        .slide-5 .chain-reaction-diagram .next-uranium-bottom { top: 67%; left: 90%; } /* Adjusted left */
+        .slide-6 .chain-reaction-diagram .uranium-atom { top: 50%; left: 20%; }
+        .slide-6 .chain-reaction-diagram .neutron-arrow { top: 50%; left: 30%; }
+        .slide-6 .chain-reaction-diagram .fission-product-top { top: 25%; left: 45%; }
+        .slide-6 .chain-reaction-diagram .fission-product-bottom { top: 75%; left: 45%; }
+        .slide-6 .chain-reaction-diagram .energy-release { top: 50%; left: 55%; }
+        .slide-6 .chain-reaction-diagram .released-neutron-top { top: 33%; left: 70%; }
+        .slide-6 .chain-reaction-diagram .released-neutron-middle { top: 50%; left: 70%; }
+        .slide-6 .chain-reaction-diagram .released-neutron-bottom { top: 67%; left: 70%; }
+        .slide-6 .chain-reaction-diagram .continuation-arrow-top { top: 33%; left: 80%; }
+        .slide-6 .chain-reaction-diagram .continuation-arrow-middle { top: 50%; left: 80%; }
+        .slide-6 .chain-reaction-diagram .continuation-arrow-bottom { top: 67%; left: 80%; }
+        .slide-6 .chain-reaction-diagram .next-uranium-top { top: 33%; left: 90%; }
+        .slide-6 .chain-reaction-diagram .next-uranium-middle { top: 50%; left: 90%; }
+        .slide-6 .chain-reaction-diagram .next-uranium-bottom { top: 67%; left: 90%; }
 
 
-        /* Specific styles for page_6.html (Hydro) */
-        .slide-6 .energy-flow {
+        /* Specific styles for hydropower plants (now slide-7) */
+        .slide-7 .energy-flow {
             position: relative;
             height: 3px;
             background-color: #3b82f6;
         }
-        .slide-6 .energy-flow::after {
+        .slide-7 .energy-flow::after {
             content: '';
             position: absolute;
             right: -5px;
@@ -294,11 +293,11 @@
             border-top: 6px solid transparent;
             border-bottom: 6px solid transparent;
         }
-        .slide-6 .physics-icon {
+        .slide-7 .physics-icon {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
         }
-        .slide-6 .video-container {
+        .slide-7 .video-container {
             position: relative;
             padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
             height: 0;
@@ -307,7 +306,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             overflow: hidden; /* Ensures rounded corners on iframe */
         }
-        .slide-6 .video-container iframe {
+        .slide-7 .video-container iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -316,8 +315,8 @@
             border-radius: 8px;
         }
 
-        /* Specific styles for page_7.html (Wind) */
-        .slide-7 .wind-arrow {
+        /* Specific styles for wind power plants (now slide-8) */
+        .slide-8 .wind-arrow {
             animation: windMove 3s infinite ease-in-out;
         }
         @keyframes windMove {
@@ -325,7 +324,7 @@
             50% { opacity: 1; }
             100% { transform: translateX(100px); opacity: 0.3; }
         }
-        .slide-7 .rotate-blade {
+        .slide-8 .rotate-blade {
             animation: rotateBlade 5s infinite linear;
             transform-origin: center;
         }
@@ -334,35 +333,35 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Specific styles for page_8.html (Solar) */
-        .slide-8 .photon {
+        /* Specific styles for solar power plants (now slide-9) */
+        .slide-9 .photon {
             animation: photonMove 3s infinite linear;
             position: absolute;
-        }
-        .slide-8 .electron {
-            animation: electronMove 3s infinite linear;
-            position: absolute;
-            opacity: 0;
         }
         @keyframes photonMove {
             0% { left: 10%; top: 20%; opacity: 1; }
             80% { left: 45%; top: 50%; opacity: 1; }
             100% { left: 45%; top: 50%; opacity: 0; }
         }
+        .slide-9 .electron {
+            animation: electronMove 3s infinite linear;
+            position: absolute;
+            opacity: 0;
+        }
         @keyframes electronMove {
             0% { left: 45%; top: 50%; opacity: 0; }
             20% { left: 45%; top: 50%; opacity: 1; }
             100% { left: 80%; top: 50%; opacity: 1; }
         }
-        .slide-8 .solar-cell-animation-box { /* New class for the animation container */
+        .slide-9 .solar-cell-animation-box {
             position: relative;
-            height: 150px; /* Reduced height to fit better */
+            height: 150px;
             border: 1px solid #6b7280;
             border-radius: 0.5rem;
             margin-top: 1rem;
-            overflow: hidden; /* Contain animation elements */
+            overflow: hidden;
         }
-        .slide-8 .solar-cell-animation-box .absolute.inset-0.flex > div {
+        .slide-9 .solar-cell-animation-box .absolute.inset-0.flex > div {
             width: 50%;
             height: 100%;
             display: flex;
@@ -371,52 +370,52 @@
         }
 
 
-        /* Specific styles for page_9.html (Efficiency) */
-        .slide-9 .chart-container {
+        /* Specific styles for efficiency and energy losses (now slide-10) */
+        .slide-10 .chart-container {
             height: 45%; /* Use percentage for responsive height */
             margin-top: 20px;
-            display: flex; /* Enable flexbox for D3.js chart to fill space */
+            display: flex;
             justify-content: center;
             align-items: center;
         }
-        .slide-9 .bar-label {
+        .slide-10 .bar-label {
             fill: white;
             font-size: 12px;
             text-anchor: middle;
         }
-        .slide-9 .efficiency-indicator {
+        .slide-10 .efficiency-indicator {
             position: relative;
             height: 12px;
             border-radius: 6px;
             background-color: #374151;
         }
-        .slide-9 .efficiency-fill {
+        .slide-10 .efficiency-fill {
             height: 100%;
             border-radius: 6px;
         }
 
-        /* Specific styles for page_10.html (Future) */
-        .slide-10 .tech-card {
+        /* Specific styles for future perspectives (now slide-11) */
+        .slide-11 .tech-card {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(5px);
             border-radius: 8px;
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
         }
-        .slide-10 .tech-card:hover {
+        .slide-11 .tech-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-        .slide-10 .tech-card.fusion {
+        .slide-11 .tech-card.fusion {
             border-left-color: #f97316;
         }
-        .slide-10 .tech-card.photovoltaik {
+        .slide-11 .tech-card.photovoltaik {
             border-left-color: #eab308;
         }
-        .slide-10 .tech-card.speicherung {
+        .slide-11 .tech-card.speicherung {
             border-left-color: #10b981;
         }
-        .slide-10 .icon-bg {
+        .slide-11 .icon-bg {
             width: 60px;
             height: 60px;
             display: flex;
@@ -424,6 +423,68 @@
             justify-content: center;
             border-radius: 50%;
         }
+
+        /* New slide: Electricity Production */
+        .slide-3_new .electricity-production-animation {
+            position: relative;
+            width: 80%;
+            height: 50%;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .slide-3_new .power-source-icon {
+            font-size: 5rem;
+            color: #f59e0b; /* yellow-500 */
+        }
+
+        .slide-3_new .electric-arc {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid #f59e0b; /* yellow-500 */
+            animation: arcMove 2s infinite alternate ease-in-out;
+            transform-origin: bottom center;
+            opacity: 0;
+        }
+
+        .slide-3_new .electric-arc:nth-child(1) { animation-delay: 0s; left: 40%; top: 30%; transform: rotate(-30deg); }
+        .slide-3_new .electric-arc:nth-child(2) { animation-delay: 0.5s; left: 50%; top: 30%; transform: rotate(0deg); }
+        .slide-3_new .electric-arc:nth-child(3) { animation-delay: 1s; left: 60%; top: 30%; transform: rotate(30deg); }
+
+        @keyframes arcMove {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { transform: translateY(-30px) scale(1); opacity: 1; }
+            100% { transform: translateY(-60px) scale(0.5); opacity: 0; }
+        }
+
+        .slide-3_new .grid-lines {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: repeating-linear-gradient(
+                to right,
+                #3b82f6,
+                #3b82f6 2px,
+                transparent 2px,
+                transparent 10px
+            );
+            opacity: 0.5;
+            animation: gridFlow 3s infinite linear;
+        }
+
+        @keyframes gridFlow {
+            from { background-position: 0% 0; }
+            to { background-position: 100% 0; }
+        }
+
 
         /* Styles for the final "End" slide */
         .slide-end .end-message {
@@ -526,19 +587,18 @@
                 margin-top: 1rem;
             }
 
-            .slide-2 .flex-1, .slide-3 .flex-1, .slide-4 .flex-1,
-            .slide-5 .flex-1, .slide-6 .flex-1, .slide-7 .flex-1,
-            .slide-8 .flex-1, .slide-9 .flex-1, .slide-10 .grid {
+            .slide-2 .flex-1, .slide-3_new .flex-1, .slide-4 .flex-1, .slide-5 .flex-1, .slide-6 .flex-1, .slide-7 .flex-1,
+            .slide-8 .flex-1, .slide-9 .flex-1, .slide-10 .flex-1, .slide-11 .grid {
                 flex-direction: column; /* Stack columns on small screens */
                 gap: 1rem;
             }
-            .slide-2 .w-1/2, .slide-3 .w-1/2, .slide-4 .w-7/12, .slide-4 .w-5/12,
-            .slide-5 .w-1/2, .slide-6 .w-1/2, .slide-7 .w-1/2, .slide-8 .w-1/2,
-            .slide-9 .w-1/3, .slide-9 .w-2/3 {
+            .slide-2 .w-1/2, .slide-3_new .w-1/2, .slide-4 .w-1/2, .slide-5 .w-7/12, .slide-5 .w-5/12,
+            .slide-6 .w-1/2, .slide-7 .w-1/2, .slide-8 .w-1/2, .slide-9 .w-1/2,
+            .slide-10 .w-1/3, .slide-10 .w-2/3 {
                 width: 100%; /* Full width for columns */
                 padding: 0; /* Remove horizontal padding */
             }
-            .slide-10 .grid {
+            .slide-11 .grid {
                 grid-template-columns: 1fr; /* Single column for future tech */
             }
             .nav-button {
@@ -567,7 +627,7 @@
         <div class="overlay flex flex-col justify-center items-start px-20">
             <div class="mb-6">
                 <h1 class="title-text text-6xl font-bold text-white mb-4">GFS Physik</h1>
-                <h2 class="title-text text-4xl font-semibold text-blue-300">Pesented by Riaz</h2>
+                <h2 class="title-text text-4xl font-semibold text-blue-300">presented by Riaz</h2>
             </div>
             <div class="content-box p-6 rounded-r-lg max-w-2xl mt-8">
                 <p class="text-white text-xl mb-4">Eine Übersicht über physikalische Prinzipien verschiedener Kraftwerkstypen</p>
@@ -578,7 +638,7 @@
             </div>
             <div class="absolute bottom-10 left-20 flex items-center">
                 <div class="w-12 h-1 bg-blue-500 mr-4"></div>
-                <p class="text-gray-300 text-lg">11 Folien</p>
+                <p class="text-gray-300 text-lg">12 Folien</p>
             </div>
             <div class="absolute bottom-10 right-20">
                 <i class="fas fa-atom text-5xl text-blue-400 opacity-80"></i>
@@ -586,86 +646,86 @@
         </div>
     </div>
 
-    <!-- Slide 2: Overview -->
+    <!-- Slide 2: Presentation Overview -->
     <div class="slide slide-2" id="slide-2">
         <div class="title-bar py-3 px-6 mb-6">
-            <h1 class="text-4xl font-bold text-white">Überblick: Kraftwerke und Energieumwandlung</h1>
+            <h1 class="text-4xl font-bold text-white">Präsentationsübersicht</h1>
         </div>
-        <div class="flex flex-1 flex-col">
-            <div class="flex flex-1 flex-col md:flex-row">
-                <div class="w-full md:w-1/2 md:pr-4 flex flex-col justify-center">
-                    <div class="content-box p-6 mb-6">
-                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Grundprinzip aller Kraftwerke</h2>
-                        <p class="text-white text-lg mb-6">Kraftwerke sind Anlagen zur Umwandlung verschiedener Energieformen in elektrische Energie.</p>
-                        <div class="flex flex-wrap items-center justify-between my-8">
-                            <div class="bg-blue-700 bg-opacity-70 p-4 rounded-lg flex-1 min-w-0 flex flex-col items-center mx-1">
-                                <i class="fas fa-fire text-3xl text-yellow-400 mb-2"></i>
-                                <span class="text-white text-center">Primärenergie</span>
-                            </div>
-                            <div class="energy-flow-arrow flex-shrink-0 w-8 md:w-1/6 h-2"></div>
-                            <div class="bg-green-700 bg-opacity-70 p-4 rounded-lg flex-1 min-w-0 flex flex-col items-center mx-1">
-                                <i class="fas fa-cogs text-3xl text-gray-200 mb-2"></i>
-                                <span class="text-white text-center">Umwandlung</span>
-                            </div>
-                            <div class="energy-flow-arrow flex-shrink-0 w-8 md:w-1/6 h-2"></div>
-                            <div class="bg-blue-500 bg-opacity-70 p-4 rounded-lg flex-1 min-w-0 flex flex-col items-center mx-1">
-                                <i class="fas fa-bolt text-3xl text-yellow-300 mb-2"></i>
-                                <span class="text-white text-center">Elektrische Energie</span>
-                            </div>
-                        </div>
-                    </div>
+        <div class="flex flex-1 flex-col justify-center items-center">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+                <!-- Corrected Order of Overview Items -->
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-fire text-3xl text-yellow-400"></i>
+                    <span class="text-white text-xl">Grundlagen der Energie</span>
                 </div>
-                <div class="w-full md:w-1/2 md:pl-4">
-                    <div class="content-box p-6 h-full">
-                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Hauptkategorien von Kraftwerken</h2>
-                        <div class="mb-6">
-                            <h3 class="text-xl text-yellow-400 mb-2 flex items-center">
-                                <i class="fas fa-industry mr-2"></i>
-                                Konventionelle Kraftwerke
-                            </h3>
-                            <div class="flex flex-wrap gap-2 ml-4">
-                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
-                                    <i class="fas fa-burn text-red-500 mr-2"></i>
-                                    <span class="text-white">Kohlekraftwerke</span>
-                                </div>
-                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
-                                    <i class="fas fa-fire-alt text-blue-400 mr-2"></i>
-                                    <span class="text-white">Gaskraftwerke</span>
-                                </div>
-                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
-                                    <i class="fas fa-atom text-green-400 mr-2"></i>
-                                    <span class="text-white">Kernkraftwerke</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-xl text-green-400 mb-2 flex items-center">
-                                <i class="fas fa-leaf mr-2"></i>
-                                Erneuerbare Energien
-                            </h3>
-                            <div class="flex flex-wrap gap-2 ml-4">
-                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
-                                    <i class="fas fa-water text-blue-300 mr-2"></i>
-                                    <span class="text-white">Wasserkraftwerke</span>
-                                </div>
-                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
-                                    <i class="fas fa-wind text-gray-300 mr-2"></i>
-                                    <span class="text-white">Windkraftwerke</span>
-                                </div>
-                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
-                                    <i class="fas fa-sun text-yellow-300 mr-2"></i>
-                                    <span class="text-white">Solarkraftwerke</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-bolt text-3xl text-yellow-300"></i>
+                    <span class="text-white text-xl">Stromproduktion</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-industry text-3xl text-red-400"></i>
+                    <span class="text-white text-xl">Konventionelle Kraftwerke</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-atom text-3xl text-green-400"></i>
+                    <span class="text-white text-xl">Kernkraftwerke</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-water text-3xl text-blue-400"></i>
+                    <span class="text-white text-xl">Wasserkraftwerke</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-wind text-3xl text-gray-300"></i>
+                    <span class="text-white text-xl">Windkraftwerke</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-sun text-3xl text-orange-400"></i>
+                    <span class="text-white text-xl">Solarkraftwerke</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-percentage text-3xl text-purple-400"></i>
+                    <span class="text-white text-xl">Wirkungsgrad & Verluste</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-lightbulb text-3xl text-cyan-400"></i>
+                    <span class="text-white text-xl">Zukunftsperspektiven</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Slide 3: Energy Conservation -->
-    <div class="slide slide-3" id="slide-3">
+    <!-- Slide 3: Electricity Production (New position for original Slide 11) -->
+    <div class="slide slide-3_new" id="slide-3">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Was Kraftwerke produzieren: Elektrische Energie</h1>
+        </div>
+        <div class="flex flex-1 flex-col justify-center items-center text-center relative overflow-hidden">
+            <h2 class="text-3xl font-semibold text-blue-300 mb-8">Umwandlung in nutzbaren Strom</h2>
+
+            <div class="electricity-production-animation w-full h-full flex flex-col justify-center items-center">
+                <div class="power-source-icon">
+                    <i class="fas fa-industry"></i> <!-- Generic power plant icon -->
+                </div>
+                <p class="text-xl text-white mt-4 mb-8">Kraftwerke wandeln verschiedene Energieformen in elektrische Energie um.</p>
+
+                <!-- Animated electric arcs -->
+                <div class="electric-arc"></div>
+                <div class="electric-arc"></div>
+                <div class="electric-arc"></div>
+
+                <!-- Animated grid lines -->
+                <div class="grid-lines"></div>
+
+                <div class="mt-8 text-xl text-yellow-300 flex items-center">
+                    <i class="fas fa-bolt mr-2"></i>
+                    <span>Elektrische Energie für Haushalte und Industrie</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Energy Conservation (Original Slide 3) -->
+    <div class="slide slide-4" id="slide-4">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Physikalisches Grundprinzip: Energieerhaltung</h1>
         </div>
@@ -771,8 +831,8 @@
         </div>
     </div>
 
-    <!-- Slide 4: Conventional Power Plants (Thermodynamics) -->
-    <div class="slide slide-4" id="slide-4">
+    <!-- Slide 5: Conventional Power Plants (Thermodynamics) (Original Slide 4) -->
+    <div class="slide slide-5" id="slide-5">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Konventionelle Kraftwerke: Thermodynamik</h1>
         </div>
@@ -860,8 +920,8 @@
         </div>
     </div>
 
-    <!-- Slide 5: Nuclear Power Plants -->
-    <div class="slide slide-5" id="slide-5">
+    <!-- Slide 6: Nuclear Power Plants (Original Slide 5) -->
+    <div class="slide slide-6" id="slide-6">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Kernkraftwerke: Kernspaltung und Kettenreaktion</h1>
         </div>
@@ -978,8 +1038,8 @@
         </div>
     </div>
 
-    <!-- Slide 6: Hydropower Plants -->
-    <div class="slide slide-6" id="slide-6">
+    <!-- Slide 7: Hydropower Plants (Original Slide 6) -->
+    <div class="slide slide-7" id="slide-7">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Wasserkraftwerke: Potentielle und kinetische Energie</h1>
         </div>
@@ -1076,8 +1136,8 @@
         </div>
     </div>
 
-    <!-- Slide 7: Wind Power Plants -->
-    <div class="slide slide-7" id="slide-7">
+    <!-- Slide 8: Wind Power Plants (Original Slide 7) -->
+    <div class="slide slide-8" id="slide-8">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Windkraftwerke: Aerodynamik und Rotationsmechanik</h1>
         </div>
@@ -1146,8 +1206,8 @@
         </div>
     </div>
 
-    <!-- Slide 8: Solar Power Plants -->
-    <div class="slide slide-8" id="slide-8">
+    <!-- Slide 9: Solar Power Plants (Original Slide 8) -->
+    <div class="slide slide-9" id="slide-9">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Solarkraftwerke: Photoelektrischer Effekt</h1>
         </div>
@@ -1189,9 +1249,9 @@
                     <div class="content-box p-4 flex-grow-0">
                         <img alt="Photovoltaikanlage" class="w-full h-auto object-cover rounded-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/81a1abd0d777ee8b043690055c1ed74b.jpg"/>
                     </div>
-                    <div class="content-box p-4 flex-grow solar-cell-animation-box"> <!-- Applied new class -->
+                    <div class="content-box p-4 flex-grow solar-cell-animation-box">
                         <h3 class="text-xl text-blue-300 mb-3">Photoelektrischer Effekt</h3>
-                        <div class="relative h-full w-full"> <!-- Make this fill parent height -->
+                        <div class="relative h-full w-full">
                             <div class="absolute inset-0 flex">
                                 <div class="bg-blue-900 bg-opacity-50">
                                     <span class="text-white opacity-70">P-Schicht</span>
@@ -1223,8 +1283,8 @@
         </div>
     </div>
 
-    <!-- Slide 9: Efficiency and Energy Losses -->
-    <div class="slide slide-9" id="slide-9">
+    <!-- Slide 10: Efficiency and Energy Losses (Original Slide 9) -->
+    <div class="slide slide-10" id="slide-10">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Wirkungsgrad und Energieverluste</h1>
         </div>
@@ -1263,11 +1323,11 @@
                     </div>
                 </div>
                 <div class="w-full md:w-2/3">
-                    <div class="content-box p-6 h-full flex flex-col"> <!-- Added flex-col to make content stretch -->
+                    <div class="content-box p-6 h-full flex flex-col">
                         <h2 class="text-2xl font-semibold text-blue-300 mb-2">Wirkungsgrad verschiedener Kraftwerkstypen</h2>
                         <p class="text-gray-300 mb-4">Maximal erreichbare Wirkungsgrade in Prozent (%)</p>
-                        <div class="chart-container flex-grow" id="efficiency-chart"></div> <!-- Flex-grow for the chart to fill space -->
-                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"> <!-- Responsive grid for indicators -->
+                        <div class="chart-container flex-grow" id="efficiency-chart"></div>
+                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
                                 <div class="flex justify-between mb-2">
                                     <span class="text-white"><i class="fas fa-water text-blue-300 mr-2"></i>Wasserkraftwerk</span>
@@ -1315,12 +1375,12 @@
         </div>
     </div>
 
-    <!-- Slide 10: Future Perspectives -->
-    <div class="slide slide-10" id="slide-10">
+    <!-- Slide 11: Future Perspectives (Original Slide 10) -->
+    <div class="slide slide-11" id="slide-11">
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Zukunftsperspektiven: Physik neuer Energietechnologien</h1>
         </div>
-        <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6"> <!-- Responsive grid -->
+        <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div class="tech-card fusion p-6 flex flex-col">
                 <div class="flex items-center mb-4">
                     <div class="icon-bg bg-orange-600 bg-opacity-30 mr-4">
@@ -1328,7 +1388,7 @@
                     </div>
                     <h2 class="text-2xl font-semibold text-white">Kernfusion</h2>
                 </div>
-                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelgung leichter Atomkerne zu schwereren.</p>
+                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelzung leichter Atomkerne zu schwereren.</p>
                 <ul class="text-gray-300 space-y-2 mb-4">
                     <li class="flex items-start">
                         <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
@@ -1417,8 +1477,8 @@
         </div>
     </div>
 
-    <!-- Slide 11: End Page -->
-    <div class="slide slide-end" id="slide-11">
+    <!-- Slide 12: End Page (Original Slide 12) -->
+    <div class="slide slide-end" id="slide-12">
         <div class="flex flex-col items-center justify-center h-full text-center">
             <h1 class="text-6xl font-bold text-white mb-8 end-message">ENDE</h1>
             <p class="text-3xl text-blue-300 questions-text">Gibt es noch Fragen?</p>
@@ -1435,7 +1495,7 @@
     <button id="prevBtn" class="nav-button">
         <i class="fas fa-arrow-left mr-2"></i> Zurück
     </button>
-    <div id="pageNumber" class="w-16 h-12 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-md">1 / 11</div>
+    <div id="pageNumber" class="w-16 h-12 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-md">1 / 12</div>
     <button id="nextBtn" class="nav-button">
         Weiter <i class="fas fa-arrow-right ml-2"></i>
     </button>
@@ -1477,8 +1537,8 @@
             prevBtn.disabled = index === 0;
             nextBtn.disabled = index === slides.length - 1;
 
-            // Handle D3.js chart rendering for slide 9
-            if (index === 8) { // Assuming slide 9 is at index 8 (0-indexed)
+            // Handle D3.js chart rendering for slide 10 (now at index 9)
+            if (slides[index].id === 'slide-10') {
                 renderEfficiencyChart();
             }
         }
@@ -1508,7 +1568,7 @@
         }
     });
 
-    // D3.js Chart Rendering Function (from page_9.html)
+    // D3.js Chart Rendering Function (from original page_9.html, now slide 10)
     function renderEfficiencyChart() {
         const chartContainer = document.getElementById('efficiency-chart');
         if (!chartContainer) return; // Exit if container not found
@@ -1526,8 +1586,6 @@
         ];
 
         const margin = {top: 30, right: 30, bottom: 70, left: 60};
-        // Use clientWidth and clientHeight for responsive chart sizing
-        // Ensure chart container itself has flexible dimensions for clientWidth/Height to be meaningful
         const width = chartContainer.clientWidth - margin.left - margin.right;
         const height = chartContainer.clientHeight - margin.top - margin.bottom;
 
@@ -1616,8 +1674,8 @@
         } else {
             fullscreenBtn.innerHTML = '<i class="fas fa-expand mr-2"></i> Vollbild';
         }
-        // Re-render D3 chart if slide 9 is active to adjust to new dimensions
-        if (currentSlideIndex === 8) {
+        // Re-render D3 chart if slide 10 is active to adjust to new dimensions
+        if (currentSlideIndex === 9) {
             renderEfficiencyChart();
         }
     });
@@ -1627,7 +1685,8 @@
         // Check if currently in fullscreen mode
         if (document.fullscreenElement) {
             // Check if the click target is NOT one of the navigation buttons
-            if (e.target !== prevBtn && e.target !== nextBtn && !prevBtn.contains(e.target) && !nextBtn.contains(e.target)) {
+            // Use closest to check if the clicked element or any of its parents is a nav button
+            if (!e.target.closest('#prevBtn') && !e.target.closest('#nextBtn') && !e.target.closest('#fullscreenBtn')) {
                 // If it's a tap outside the navigation buttons, advance to next slide
                 nextBtn.click();
             }
@@ -1639,9 +1698,9 @@
         showSlide(currentSlideIndex);
     });
 
-    // Re-render D3 chart on window resize if slide 9 is active
+    // Re-render D3 chart on window resize if slide 10 is active
     window.addEventListener('resize', () => {
-        if (currentSlideIndex === 8) { // If slide 9 is currently active
+        if (currentSlideIndex === 9) { // If slide 10 is currently active
             renderEfficiencyChart();
         }
     });
