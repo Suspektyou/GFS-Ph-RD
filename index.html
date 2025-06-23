@@ -247,6 +247,35 @@
         .slide-5 .glow {
             filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.8));
         }
+        /* New styles for responsive chain reaction diagram */
+        .slide-5 .chain-reaction-diagram {
+            position: relative;
+            width: 100%; /* Make it fill its parent */
+            padding-bottom: 60%; /* Maintain aspect ratio */
+            height: 0; /* Important for padding-bottom trick */
+        }
+
+        .slide-5 .chain-reaction-diagram > div {
+            position: absolute;
+            transform: translate(-50%, -50%); /* Adjust for center alignment */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        .slide-5 .chain-reaction-diagram .uranium-atom { top: 50%; left: 20%; }
+        .slide-5 .chain-reaction-diagram .neutron-arrow { top: 50%; left: 30%; }
+        .slide-5 .chain-reaction-diagram .fission-product-top { top: 25%; left: 45%; }
+        .slide-5 .chain-reaction-diagram .fission-product-bottom { top: 75%; left: 45%; }
+        .slide-5 .chain-reaction-diagram .energy-release { top: 50%; left: 55%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .released-neutron-top { top: 33%; left: 70%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .released-neutron-middle { top: 50%; left: 70%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .released-neutron-bottom { top: 67%; left: 70%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .continuation-arrow-top { top: 33%; left: 80%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .continuation-arrow-middle { top: 50%; left: 80%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .continuation-arrow-bottom { top: 67%; left: 80%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .next-uranium-top { top: 33%; left: 90%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .next-uranium-middle { top: 50%; left: 90%; } /* Adjusted left */
+        .slide-5 .chain-reaction-diagram .next-uranium-bottom { top: 67%; left: 90%; } /* Adjusted left */
+
 
         /* Specific styles for page_6.html (Hydro) */
         .slide-6 .energy-flow {
@@ -441,23 +470,6 @@
             transform: none;
             box-shadow: none;
         }
-        /* Style for Gemini API response area */
-        .gemini-response-area {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background-color: rgba(25, 27, 36, 0.9); /* Darker background */
-            border-left: 4px solid #f59e0b; /* Orange border */
-            border-radius: 0.5rem;
-            color: #d1d5db; /* Light gray text */
-            font-size: 0.95rem;
-            max-height: 200px; /* Limit height */
-            overflow-y: auto; /* Add scroll if content overflows */
-        }
-        .loading-indicator {
-            display: none;
-            margin-top: 0.5rem;
-            color: #f59e0b;
-        }
 
         /* Fullscreen button specific styles */
         .fullscreen-button {
@@ -554,8 +566,8 @@
         <img alt="Power transmission towers at sunset" class="bg-image" src="https://picture-search.skywork.ai/aippt/image/sheet/b101b528869bc7ac793b5f8b533e9642.jpg"/>
         <div class="overlay flex flex-col justify-center items-start px-20">
             <div class="mb-6">
-                <h1 class="title-text text-6xl font-bold text-white mb-4">Physik der Kraftwerke</h1>
-                <h2 class="title-text text-4xl font-semibold text-blue-300">Energieerzeugung und Umwandlung</h2>
+                <h1 class="title-text text-6xl font-bold text-white mb-4">GFS Physik</h1>
+                <h2 class="title-text text-4xl font-semibold text-blue-300">Pesented by Riaz</h2>
             </div>
             <div class="content-box p-6 rounded-r-lg max-w-2xl mt-8">
                 <p class="text-white text-xl mb-4">Eine Übersicht über physikalische Prinzipien verschiedener Kraftwerkstypen</p>
@@ -566,7 +578,7 @@
             </div>
             <div class="absolute bottom-10 left-20 flex items-center">
                 <div class="w-12 h-1 bg-blue-500 mr-4"></div>
-                <p class="text-gray-300 text-lg">10 Folien zur Physik moderner Energieerzeugung</p>
+                <p class="text-gray-300 text-lg">11 Folien</p>
             </div>
             <div class="absolute bottom-10 right-20">
                 <i class="fas fa-atom text-5xl text-blue-400 opacity-80"></i>
@@ -579,8 +591,8 @@
         <div class="title-bar py-3 px-6 mb-6">
             <h1 class="text-4xl font-bold text-white">Überblick: Kraftwerke und Energieumwandlung</h1>
         </div>
-        <div class="flex flex-1 flex-col"> <!-- Changed to flex-col to accommodate LLM feature -->
-            <div class="flex flex-1 flex-col md:flex-row"> <!-- Responsive columns -->
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row">
                 <div class="w-full md:w-1/2 md:pr-4 flex flex-col justify-center">
                     <div class="content-box p-6 mb-6">
                         <h2 class="text-2xl font-semibold text-blue-300 mb-4">Grundprinzip aller Kraftwerke</h2>
@@ -647,16 +659,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-2" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(2)">Frage stellen ✨</button>
-                    <div id="response-slide-2" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-2" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
                 </div>
             </div>
         </div>
@@ -766,16 +768,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-3" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(3)">Frage stellen ✨</button>
-                    <div id="response-slide-3" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-3" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -865,16 +857,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-4" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(4)">Frage stellen ✨</button>
-                    <div id="response-slide-4" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-4" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -926,64 +908,64 @@
                         </div>
                         <div class="bg-gray-900 bg-opacity-70 p-4 rounded-lg">
                             <h3 class="text-xl text-blue-300 mb-4 text-center">Kettenreaktion - Vereinfacht</h3>
-                            <div class="flex justify-center items-center h-48 relative w-full"> <!-- Ensure animation container has dimensions -->
-                                <div class="absolute left-[20%] top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                            <div class="chain-reaction-diagram relative"> <!-- Use new responsive class -->
+                                <div class="uranium-atom">
                                     <div class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center border-4 border-gray-300">
                                         <i class="fas fa-atom text-3xl text-white atom-pulse"></i>
                                     </div>
                                     <div class="text-center text-white mt-2">Uran</div>
                                 </div>
-                                <div class="absolute left-[30%] top-1/2 transform -translate-y-1/2">
+                                <div class="neutron-arrow">
                                     <i class="fas fa-arrow-right text-yellow-400 text-2xl glow"></i>
                                 </div>
-                                <div class="absolute left-[40%] top-1/4 transform -translate-x-1/2">
+                                <div class="fission-product-top">
                                     <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                                         <i class="fas fa-circle text-sm text-white"></i>
                                     </div>
                                     <div class="text-center text-white mt-1 text-xs">Spaltprodukt</div>
                                 </div>
-                                <div class="absolute left-[40%] top-3/4 transform -translate-x-1/2">
+                                <div class="fission-product-bottom">
                                     <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
                                         <i class="fas fa-circle text-sm text-white"></i>
                                     </div>
                                     <div class="text-center text-white mt-1 text-xs">Spaltprodukt</div>
                                 </div>
-                                <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <div class="energy-release">
                                     <i class="fas fa-bolt text-4xl text-yellow-500 glow"></i>
                                     <div class="text-center text-yellow-400 mt-1">Energie</div>
                                 </div>
-                                <div class="absolute left-[65%] top-1/3">
+                                <div class="released-neutron-top">
                                     <div class="w-6 h-6 rounded-full bg-orange-500"></div>
                                     <div class="text-center text-white mt-1 text-xs">Neutron</div>
                                 </div>
-                                <div class="absolute left-[65%] top-1/2">
+                                <div class="released-neutron-middle">
                                     <div class="w-6 h-6 rounded-full bg-orange-500"></div>
                                     <div class="text-center text-white mt-1 text-xs">Neutron</div>
                                 </div>
-                                <div class="absolute left-[65%] top-2/3">
+                                <div class="released-neutron-bottom">
                                     <div class="w-6 h-6 rounded-full bg-orange-500"></div>
                                     <div class="text-center text-white mt-1 text-xs">Neutron</div>
                                 </div>
-                                <div class="absolute right-[15%] top-1/3">
+                                <div class="continuation-arrow-top">
                                     <i class="fas fa-arrow-right text-yellow-400 text-xl"></i>
                                 </div>
-                                <div class="absolute right-[15%] top-1/2">
+                                <div class="continuation-arrow-middle">
                                     <i class="fas fa-arrow-right text-yellow-400 text-xl"></i>
                                 </div>
-                                <div class="absolute right-[15%] top-2/3">
+                                <div class="continuation-arrow-bottom">
                                     <i class="fas fa-arrow-right text-yellow-400 text-xl"></i>
                                 </div>
-                                <div class="absolute right-[5%] top-1/3">
+                                <div class="next-uranium-top">
                                     <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center border-2 border-gray-300">
                                         <i class="fas fa-atom text-xl text-white"></i>
                                     </div>
                                 </div>
-                                <div class="absolute right-[5%] top-1/2">
+                                <div class="next-uranium-middle">
                                     <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center border-2 border-gray-300">
                                         <i class="fas fa-atom text-xl text-white"></i>
                                     </div>
                                 </div>
-                                <div class="absolute right-[5%] top-2/3">
+                                <div class="next-uranium-bottom">
                                     <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center border-2 border-gray-300">
                                         <i class="fas fa-atom text-xl text-white"></i>
                                     </div>
@@ -991,16 +973,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-5" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(5)">Frage stellen ✨</button>
-                    <div id="response-slide-5" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-5" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
                 </div>
             </div>
         </div>
@@ -1101,16 +1073,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-6" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(6)">Frage stellen ✨</button>
-                    <div id="response-slide-6" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-6" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1179,16 +1141,6 @@
                             <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" data-sk-video-cover="https://picture-search.skywork.ai/aippt/image/sheet/7f77e8de22755892db14a563ddc5922a.jpg" frameborder="0" src="https://www.youtube.com/embed/6GpsZzPisZs" title="Windkraftanlage Funktionsweise"></iframe>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-7" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(7)">Frage stellen ✨</button>
-                    <div id="response-slide-7" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-7" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
                 </div>
             </div>
         </div>
@@ -1266,16 +1218,6 @@
                             <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" data-sk-video-cover="https://picture-search.skywork.ai/aippt/image/sheet/75935c008e3d00a99f8c6b8c0a7beb3a.jpg" frameborder="0" src="https://www.youtube.com/embed/VMe_yyNNaoU"></iframe>
                         </div>
                     </div>
-                </div>
-            </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-8" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(8)">Frage stellen ✨</button>
-                    <div id="response-slide-8" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-8" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
                 </div>
             </div>
         </div>
@@ -1370,16 +1312,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Gemini API Feature -->
-            <div class="mt-6">
-                <div class="content-box p-4">
-                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
-                    <textarea id="question-slide-9" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
-                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(9)">Frage stellen ✨</button>
-                    <div id="response-slide-9" class="gemini-response-area hidden"></div>
-                    <div id="loading-slide-9" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1396,7 +1328,7 @@
                     </div>
                     <h2 class="text-2xl font-semibold text-white">Kernfusion</h2>
                 </div>
-                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelzung leichter Atomkerne zu schwereren.</p>
+                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelgung leichter Atomkerne zu schwereren.</p>
                 <ul class="text-gray-300 space-y-2 mb-4">
                     <li class="flex items-start">
                         <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
@@ -1549,23 +1481,6 @@
             if (index === 8) { // Assuming slide 9 is at index 8 (0-indexed)
                 renderEfficiencyChart();
             }
-
-            // Clear previous LLM responses and hide sections for other slides
-            for (let i = 2; i <= 10; i++) {
-                const responseDiv = document.getElementById(`response-slide-${i}`);
-                if (responseDiv) {
-                    responseDiv.innerHTML = '';
-                    responseDiv.classList.add('hidden');
-                }
-                const loadingDiv = document.getElementById(`loading-slide-${i}`);
-                if (loadingDiv) {
-                    loadingDiv.style.display = 'none';
-                }
-                 const textarea = document.getElementById(`question-slide-${i}`);
-                if (textarea) {
-                    textarea.value = ''; // Clear textarea content
-                }
-            }
         }
     }
 
@@ -1612,6 +1527,7 @@
 
         const margin = {top: 30, right: 30, bottom: 70, left: 60};
         // Use clientWidth and clientHeight for responsive chart sizing
+        // Ensure chart container itself has flexible dimensions for clientWidth/Height to be meaningful
         const width = chartContainer.clientWidth - margin.left - margin.right;
         const height = chartContainer.clientHeight - margin.top - margin.bottom;
 
@@ -1674,82 +1590,6 @@
                 .text(d => d.efficiency + "%");
     }
 
-    // Function to extract text content from the current slide for LLM
-    function getSlideContent(slideId) {
-        const slideElement = document.getElementById(`slide-${slideId}`);
-        if (!slideElement) return '';
-
-        let content = '';
-        // Extract titles and main paragraphs
-        const texts = slideElement.querySelectorAll('h1, h2, h3, p, li');
-        texts.forEach(text => {
-            content += text.textContent + '\n';
-        });
-        return content;
-    }
-
-    // Function to call Gemini API
-    async function askGeminiQuestion(slideNum) {
-        const questionInput = document.getElementById(`question-slide-${slideNum}`);
-        const responseDiv = document.getElementById(`response-slide-${slideNum}`);
-        const loadingDiv = document.getElementById(`loading-slide-${slideNum}`);
-        const userQuestion = questionInput.value.trim();
-
-        if (!userQuestion) {
-            responseDiv.innerHTML = '<span class="text-red-400">Bitte geben Sie eine Frage ein.</span>';
-            responseDiv.classList.remove('hidden');
-            return;
-        }
-
-        responseDiv.classList.add('hidden');
-        responseDiv.innerHTML = ''; // Clear previous response
-        loadingDiv.style.display = 'block'; // Show loading indicator
-
-        try {
-            const slideContent = getSlideContent(slideNum);
-            let chatHistory = [];
-            
-            // Provide a clear prompt for the LLM based on slide content and user question
-            let prompt = `Beantworten Sie die folgende Frage prägnant und basierend auf dem bereitgestellten Folieninhalt. Falls der Folieninhalt die Frage nicht direkt beantwortet, verwenden Sie allgemeines Wissen über die Physik von Kraftwerken, um eine relevante Antwort zu geben.
-
-Folieninhalt:
-${slideContent}
-
-Benutzerfrage: ${userQuestion}`;
-
-            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-
-            const payload = { contents: chatHistory };
-            const apiKey = ""; // Canvas will automatically provide the API key
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-            
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                const text = result.candidates[0].content.parts[0].text;
-                responseDiv.innerHTML = text;
-                responseDiv.classList.remove('hidden');
-            } else {
-                responseDiv.innerHTML = '<span class="text-red-400">Entschuldigung, ich konnte keine Antwort generieren. Bitte versuchen Sie es später erneut.</span>';
-                responseDiv.classList.remove('hidden');
-            }
-        } catch (error) {
-            console.error('Error calling Gemini API:', error);
-            responseDiv.innerHTML = '<span class="text-red-400">Fehler beim Abrufen der Antwort. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.</span>';
-            responseDiv.classList.remove('hidden');
-        } finally {
-            loadingDiv.style.display = 'none'; // Hide loading indicator
-        }
-    }
-
     // Fullscreen functionality
     fullscreenBtn.addEventListener('click', () => {
         if (document.fullscreenElement) {
@@ -1779,6 +1619,18 @@ Benutzerfrage: ${userQuestion}`;
         // Re-render D3 chart if slide 9 is active to adjust to new dimensions
         if (currentSlideIndex === 8) {
             renderEfficiencyChart();
+        }
+    });
+
+    // Tap to advance functionality (only in fullscreen)
+    slidesContainer.addEventListener('click', (e) => {
+        // Check if currently in fullscreen mode
+        if (document.fullscreenElement) {
+            // Check if the click target is NOT one of the navigation buttons
+            if (e.target !== prevBtn && e.target !== nextBtn && !prevBtn.contains(e.target) && !nextBtn.contains(e.target)) {
+                // If it's a tap outside the navigation buttons, advance to next slide
+                nextBtn.click();
+            }
         }
     });
 
