@@ -165,6 +165,11 @@
         .slide-4 .circular-flow > div { /* Adjust child positioning within responsive circle */
             position: absolute;
             transform: translate(-50%, -50%);
+            display: flex; /* Ensure inner content is centered */
+            flex-direction: column; /* Stack icon and text */
+            align-items: center; /* Center horizontally */
+            justify-content: center; /* Center vertically */
+            text-align: center; /* Center text */
         }
         .slide-4 .circular-flow > div:nth-child(1) { top: 0; left: 50%; } /* Solarenergie */
         .slide-4 .circular-flow > div:nth-child(2) { top: 50%; right: 0; transform: translate(50%, -50%); } /* Chemische Energie */
@@ -653,14 +658,14 @@
         </div>
         <div class="flex flex-1 flex-col justify-center items-center">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
-                <!-- Corrected Order of Overview Items -->
-                <div class="content-box p-4 flex items-center space-x-4">
-                    <i class="fas fa-fire text-3xl text-yellow-400"></i>
-                    <span class="text-white text-xl">Grundlagen der Energie</span>
-                </div>
+                <!-- Corrected Order of Overview Items matching slide progression -->
                 <div class="content-box p-4 flex items-center space-x-4">
                     <i class="fas fa-bolt text-3xl text-yellow-300"></i>
                     <span class="text-white text-xl">Stromproduktion</span>
+                </div>
+                <div class="content-box p-4 flex items-center space-x-4">
+                    <i class="fas fa-fire text-3xl text-yellow-400"></i>
+                    <span class="text-white text-xl">Grundlagen der Energie</span>
                 </div>
                 <div class="content-box p-4 flex items-center space-x-4">
                     <i class="fas fa-industry text-3xl text-red-400"></i>
@@ -885,23 +890,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="content-box p-5">
-                        <h2 class="text-2xl font-semibold text-blue-300 mb-3">Physikalische Prinzipien</h2>
-                        <div class="space-y-3">
-                            <div class="key-point pl-3 py-2">
-                                <h3 class="text-lg font-medium text-yellow-300">Druck-Temperatur-Beziehung</h3>
-                                <p class="text-white text-sm">Bei höherem Druck steigt die Siedetemperatur des Wassers. Der Dampf erhält mehr Energie und kann mehr Arbeit verrichten.</p>
-                            </div>
-                            <div class="key-point pl-3 py-2">
-                                <h3 class="text-lg font-medium text-yellow-300">Wärmeübertragung</h3>
-                                <p class="text-white text-sm">Wärmeenergie fließt stets vom wärmeren zum kälteren Körper (2. Hauptsatz der Thermodynamik).</p>
-                            </div>
-                            <div class="key-point pl-3 py-2">
-                                <h3 class="text-lg font-medium text-yellow-300">Thermischer Wirkungsgrad</h3>
-                                <p class="text-white text-sm">Kohlekraftwerke: bis zu 45%, Gas-und-Dampf-Kombikraftwerke: bis zu 60% der zugeführten Wärmeenergie wird in elektrische Energie umgewandelt.</p>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Removed "Physikalische Prinzipien" section -->
                 </div>
                 <div class="w-full md:w-5/12 flex flex-col">
                     <div class="mb-4">
@@ -1388,7 +1377,7 @@
                     </div>
                     <h2 class="text-2xl font-semibold text-white">Kernfusion</h2>
                 </div>
-                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelzung leichter Atomkerne zu schwereren.</p>
+                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelgung leichter Atomkerne zu schwereren.</p>
                 <ul class="text-gray-300 space-y-2 mb-4">
                     <li class="flex items-start">
                         <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
