@@ -1,486 +1,1800 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physik der Kraftwerke - Eine moderne Präsentation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Physik der Kraftwerke - Präsentation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #1e3a8a;
-            --accent-color: #f59e0b;
-            --background-color: #f1f5f9;
-            --text-color: #1e293b;
-            --slide-width: 1280px;
-            --slide-height: 720px;
+        /* Base styles for the presentation container */
+        body, html {
+            width: 100vw; /* Use viewport width */
+            height: 100vh; /* Use viewport height */
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Hide scrollbars */
+            font-family: "Inter", sans-serif; /* Use Inter font */
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--secondary-color);
+        /* Styling for the main slides container */
+        #slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(120deg, #1e3a8a 0%, #1e3a5a 100%); /* Default background for slides */
+        }
+
+        /* Styling for individual slide */
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 1s ease-in-out; /* Smooth transition for slides */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack content vertically */
+            justify-content: space-between; /* Space out content and nav */
+            padding: 2rem; /* Add some padding */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+            color: white; /* Default text color */
+        }
+
+        /* Active slide will be visible */
+        .slide.active {
+            opacity: 1;
+            z-index: 10; /* Bring active slide to front */
+        }
+
+        /* Specific styles for page_1.html background image and overlay */
+        .slide-1 .bg-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .slide-1 .overlay {
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 0 5rem; /* Equivalent to px-20 */
+            z-index: 2;
+        }
+
+        .slide-1 .title-text {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        /* Common styles for content boxes and title bars */
+        .title-bar {
+            background: rgba(0,0,0,0.4);
+            border-left: 6px solid #3b82f6;
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            margin-bottom: 1.5rem; /* mb-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+
+        .content-box {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1.5rem; /* p-6 */
+        }
+
+        /* Specific styles for page_2.html */
+        .slide-2 .energy-flow-arrow {
+            position: relative;
+            height: 2px;
+            background-color: #f59e0b;
+        }
+        .slide-2 .energy-flow-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #f59e0b;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .slide-2 .type-card {
+            transition: all 0.3s ease;
+        }
+        .slide-2 .type-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Specific styles for page_3.html */
+        .slide-3 .energy-icon {
+            height: 70px;
+            width: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
+            border-radius: 50%;
         }
-
-        #presentation-container {
-            width: var(--slide-width);
-            height: var(--slide-height);
+        .slide-3 .energy-arrow {
             position: relative;
-            transform: scale(var(--scale, 1));
-            transform-origin: top left;
-        }
-
-        .slide {
-            position: absolute;
+            height: 3px;
+            background-color: #f59e0b;
             width: 100%;
-            height: 100%;
-            background-color: var(--background-color);
-            border-radius: 12px;
-            overflow: hidden;
-            opacity: 0;
-            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
-            transform: scale(0.95);
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
         }
-
-        .slide.active {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-            z-index: 10;
-        }
-
-        .slide-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 2rem;
-            font-size: 2rem;
-            font-weight: 600;
-        }
-
-        .slide-content {
-            padding: 2rem;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #nav-controls {
+        .slide-3 .energy-arrow::after {
+            content: '';
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 8px 15px;
-            border-radius: 20px;
-            z-index: 100;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #f59e0b;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
         }
-
-        .nav-arrow {
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.2s;
+        .slide-3 .highlight-text {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
         }
-
-        .nav-arrow:hover {
-            color: var(--accent-color);
+        .slide-3 .circular-flow {
+            position: relative;
+            width: 60%; /* Made responsive */
+            padding-bottom: 60%; /* Maintain aspect ratio (1:1) */
+            margin: 0 auto;
         }
-
-        #slide-counter {
-            color: white;
-            margin: 0 15px;
-            font-size: 1rem;
-        }
-        
-        #progress-bar-container {
+        .slide-3 .circular-flow::before {
+            content: '';
             position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
             bottom: 0;
+            border: 3px dashed #f59e0b;
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+        }
+        .slide-3 .circular-flow > div { /* Adjust child positioning within responsive circle */
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+        .slide-3 .circular-flow > div:nth-child(1) { top: 0; left: 50%; } /* Solarenergie */
+        .slide-3 .circular-flow > div:nth-child(2) { top: 50%; right: 0; transform: translate(50%, -50%); } /* Chemische Energie */
+        .slide-3 .circular-flow > div:nth-child(3) { bottom: 0; left: 50%; transform: translate(-50%, 50%); } /* Potentielle Energie */
+        .slide-3 .circular-flow > div:nth-child(4) { top: 50%; left: 0; } /* Wärmeenergie */
+        .slide-3 .circular-flow > div:nth-child(5) { top: 50%; left: 50%; } /* Center Element */
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Specific styles for page_4.html */
+        .slide-4 .process-step {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .slide-4 .process-step:hover {
+            transform: translateY(-5px);
+        }
+        .slide-4 .process-arrow {
+            position: relative;
+            height: 2px;
+            background-color: #f59e0b;
+        }
+        .slide-4 .process-arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #f59e0b;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .slide-4 .key-point {
+            border-left: 3px solid #3b82f6;
+            transition: all 0.2s ease;
+        }
+        .slide-4 .key-point:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+        }
+        .slide-4 .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            overflow: hidden; /* Ensures rounded corners on iframe */
+        }
+        .slide-4 .video-container iframe {
+            position: absolute;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
-            background-color: rgba(255, 255, 255, 0.2);
-            z-index: 100;
-        }
-
-        #progress-bar {
-            width: 0%;
             height: 100%;
-            background-color: var(--accent-color);
-            transition: width 0.3s ease-out;
-        }
-        
-        .key-takeaway {
-            background-color: #eef2ff;
-            border-left: 5px solid var(--primary-color);
-            padding: 1.5rem;
-            margin-top: 1rem;
-            border-radius: 0 8px 8px 0;
+            border-radius: 8px;
         }
 
-        .key-takeaway h3 {
-            color: var(--secondary-color);
-            font-weight: 600;
-            font-size: 1.25rem;
+
+        /* Specific styles for page_5.html (Nuclear) */
+        .slide-5 .atom-pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .slide-5 .glow {
+            filter: drop-shadow(0 0 8px rgba(255, 165, 0, 0.8));
+        }
+
+        /* Specific styles for page_6.html (Hydro) */
+        .slide-6 .energy-flow {
+            position: relative;
+            height: 3px;
+            background-color: #3b82f6;
+        }
+        .slide-6 .energy-flow::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: -5px;
+            width: 0;
+            height: 0;
+            border-left: 12px solid #3b82f6;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+        }
+        .slide-6 .physics-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .slide-6 .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            overflow: hidden; /* Ensures rounded corners on iframe */
+        }
+        .slide-6 .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        /* Specific styles for page_7.html (Wind) */
+        .slide-7 .wind-arrow {
+            animation: windMove 3s infinite ease-in-out;
+        }
+        @keyframes windMove {
+            0% { transform: translateX(0); opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100px); opacity: 0.3; }
+        }
+        .slide-7 .rotate-blade {
+            animation: rotateBlade 5s infinite linear;
+            transform-origin: center;
+        }
+        @keyframes rotateBlade {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Specific styles for page_8.html (Solar) */
+        .slide-8 .photon {
+            animation: photonMove 3s infinite linear;
+            position: absolute;
+        }
+        .slide-8 .electron {
+            animation: electronMove 3s infinite linear;
+            position: absolute;
+            opacity: 0;
+        }
+        @keyframes photonMove {
+            0% { left: 10%; top: 20%; opacity: 1; }
+            80% { left: 45%; top: 50%; opacity: 1; }
+            100% { left: 45%; top: 50%; opacity: 0; }
+        }
+        @keyframes electronMove {
+            0% { left: 45%; top: 50%; opacity: 0; }
+            20% { left: 45%; top: 50%; opacity: 1; }
+            100% { left: 80%; top: 50%; opacity: 1; }
+        }
+        .slide-8 .solar-cell-animation-box { /* New class for the animation container */
+            position: relative;
+            height: 150px; /* Reduced height to fit better */
+            border: 1px solid #6b7280;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            overflow: hidden; /* Contain animation elements */
+        }
+        .slide-8 .solar-cell-animation-box .absolute.inset-0.flex > div {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        /* Specific styles for page_9.html (Efficiency) */
+        .slide-9 .chart-container {
+            height: 45%; /* Use percentage for responsive height */
+            margin-top: 20px;
+            display: flex; /* Enable flexbox for D3.js chart to fill space */
+            justify-content: center;
+            align-items: center;
+        }
+        .slide-9 .bar-label {
+            fill: white;
+            font-size: 12px;
+            text-anchor: middle;
+        }
+        .slide-9 .efficiency-indicator {
+            position: relative;
+            height: 12px;
+            border-radius: 6px;
+            background-color: #374151;
+        }
+        .slide-9 .efficiency-fill {
+            height: 100%;
+            border-radius: 6px;
+        }
+
+        /* Specific styles for page_10.html (Future) */
+        .slide-10 .tech-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .slide-10 .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .slide-10 .tech-card.fusion {
+            border-left-color: #f97316;
+        }
+        .slide-10 .tech-card.photovoltaik {
+            border-left-color: #eab308;
+        }
+        .slide-10 .tech-card.speicherung {
+            border-left-color: #10b981;
+        }
+        .slide-10 .icon-bg {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Styles for the final "End" slide */
+        .slide-end .end-message {
+            animation: fadeInScale 2s ease-out forwards;
+        }
+
+        .slide-end .questions-text {
+            animation: slideInUp 1.5s ease-out forwards;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideInUp {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Navigation buttons */
+        .nav-button {
+            background-color: rgba(59, 130, 246, 0.7); /* blue-500 with opacity */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px; /* full rounded */
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem; /* text-lg */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .nav-button:hover {
+            background-color: rgba(37, 99, 235, 0.9); /* blue-600 with more opacity */
+            transform: translateY(-2px);
+        }
+        .nav-button:disabled {
+            background-color: rgba(107, 114, 128, 0.5); /* gray-500 with opacity */
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        /* Style for Gemini API response area */
+        .gemini-response-area {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: rgba(25, 27, 36, 0.9); /* Darker background */
+            border-left: 4px solid #f59e0b; /* Orange border */
+            border-radius: 0.5rem;
+            color: #d1d5db; /* Light gray text */
+            font-size: 0.95rem;
+            max-height: 200px; /* Limit height */
+            overflow-y: auto; /* Add scroll if content overflows */
+        }
+        .loading-indicator {
+            display: none;
+            margin-top: 0.5rem;
+            color: #f59e0b;
+        }
+
+        /* Fullscreen button specific styles */
+        .fullscreen-button {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 30; /* Above everything else */
+            background-color: rgba(59, 130, 246, 0.7);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .fullscreen-button:hover {
+            background-color: rgba(37, 99, 235, 0.9);
+            transform: translateY(-2px);
+        }
+
+        /* Adjustments for smaller screens (e.g., mobile portrait) */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 1rem;
+            }
+            .slide-1 .overlay {
+                padding: 0 1rem;
+                align-items: center;
+                text-align: center;
+            }
+            .slide-1 .title-text {
+                font-size: 3rem; /* Smaller title */
+            }
+            .slide-1 .content-box {
+                margin-top: 2rem;
+                max-width: 100%;
+                border-radius: 0.5rem;
+            }
+            .slide-1 .absolute.bottom-10 {
+                position: static;
+                margin-top: 2rem;
+                flex-direction: column;
+                text-align: center;
+            }
+            .slide-1 .absolute.bottom-10.left-20 {
+                justify-content: center;
+                align-items: center;
+            }
+            .slide-1 .absolute.bottom-10.right-20 {
+                position: static;
+                margin-top: 1rem;
+            }
+
+            .slide-2 .flex-1, .slide-3 .flex-1, .slide-4 .flex-1,
+            .slide-5 .flex-1, .slide-6 .flex-1, .slide-7 .flex-1,
+            .slide-8 .flex-1, .slide-9 .flex-1, .slide-10 .grid {
+                flex-direction: column; /* Stack columns on small screens */
+                gap: 1rem;
+            }
+            .slide-2 .w-1/2, .slide-3 .w-1/2, .slide-4 .w-7/12, .slide-4 .w-5/12,
+            .slide-5 .w-1/2, .slide-6 .w-1/2, .slide-7 .w-1/2, .slide-8 .w-1/2,
+            .slide-9 .w-1/3, .slide-9 .w-2/3 {
+                width: 100%; /* Full width for columns */
+                padding: 0; /* Remove horizontal padding */
+            }
+            .slide-10 .grid {
+                grid-template-columns: 1fr; /* Single column for future tech */
+            }
+            .nav-button {
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+            }
+            .page-number {
+                font-size: 0.9rem;
+            }
+            .fullscreen-button {
+                top: 0.5rem;
+                right: 0.5rem;
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="presentation-container">
-        <div class="slide active">
-            <div class="h-full w-full bg-cover bg-center" style="background-image: url('https://picture-search.skywork.ai/aippt/image/sheet/b101b528869bc7ac793b5f8b533e9642.jpg');">
-                <div class="h-full w-full bg-black bg-opacity-60 flex flex-col justify-center items-center text-white text-center p-8">
-                    <h1 class="text-7xl font-bold" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Physik der Kraftwerke</h1>
-                    <p class="text-4xl mt-4 font-light" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Energieerzeugung und Umwandlung</p>
-                    <div class="mt-12 border-t-2 border-accent-color w-1/4"></div>
-                    <p class="mt-8 text-xl">Eine Übersicht über die physikalischen Prinzipien moderner Energieerzeugung.</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="slide">
-            <header class="slide-header">Überblick: Kraftwerke und Energieumwandlung</header>
-            <div class="slide-content">
-                <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Grundprinzip aller Kraftwerke</h2>
-                        <p class="text-xl mb-8">Kraftwerke sind Anlagen, die verschiedene Energieformen in die für uns universell nutzbare elektrische Energie umwandeln.</p>
-                        <div class="flex items-center justify-around text-center text-lg font-semibold">
-                            <div class="flex flex-col items-center"><i class="fas fa-fire text-5xl text-red-500 mb-2"></i><span>Primärenergie</span></div>
-                            <i class="fas fa-arrow-right text-4xl text-accent-color"></i>
-                            <div class="flex flex-col items-center"><i class="fas fa-cogs text-5xl text-gray-500 mb-2"></i><span>Umwandlung</span></div>
-                             <i class="fas fa-arrow-right text-4xl text-accent-color"></i>
-                            <div class="flex flex-col items-center"><i class="fas fa-bolt text-5xl text-yellow-500 mb-2"></i><span>Elektrische Energie</span></div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-200 p-6 rounded-lg">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-6">Hauptkategorien</h2>
-                        <h3 class="text-2xl text-gray-700 mb-3 flex items-center"><i class="fas fa-industry mr-3 text-primary-color"></i>Konventionelle Kraftwerke</h3>
-                        <ul class="list-disc list-inside text-xl ml-4 space-y-2 mb-6">
-                            <li>Kohlekraftwerke</li>
-                            <li>Gaskraftwerke</li>
-                            <li>Kernkraftwerke</li>
-                        </ul>
-                        <h3 class="text-2xl text-green-600 mb-3 flex items-center"><i class="fas fa-leaf mr-3"></i>Erneuerbare Energien</h3>
-                        <ul class="list-disc list-inside text-xl ml-4 space-y-2">
-                             <li>Wasserkraftwerke</li>
-                            <li>Windkraftwerke</li>
-                            <li>Solarkraftwerke</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="slides-container">
 
-        <div class="slide">
-            <header class="slide-header">Physikalisches Grundprinzip: Energieerhaltung</header>
-            <div class="slide-content">
-                 <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Der Energieerhaltungssatz</h2>
-                        <p class="text-xl mb-6">"Energie kann weder erzeugt noch vernichtet, sondern nur von einer Form in eine andere umgewandelt werden."</p>
-                        <div class="bg-blue-100 p-4 rounded-lg text-xl mb-8">
-                            <p class="font-semibold text-center">In einem geschlossenen System bleibt die Gesamtenergie stets konstant.</p>
-                        </div>
-                        <h3 class="text-2xl font-semibold text-secondary-color mb-4">Beispiel: Umwandlungskette im Kohlekraftwerk</h3>
-                        <div class="flex items-center justify-between text-center text-sm">
-                            <div class="flex flex-col items-center"><div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center"><i class="fas fa-fire text-4xl text-yellow-500"></i></div><span class="mt-2 font-semibold">Chemische Energie</span></div>
-                            <i class="fas fa-chevron-right text-2xl text-gray-400"></i>
-                             <div class="flex flex-col items-center"><div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center"><i class="fas fa-temperature-high text-4xl text-red-500"></i></div><span class="mt-2 font-semibold">Wärmeenergie</span></div>
-                            <i class="fas fa-chevron-right text-2xl text-gray-400"></i>
-                             <div class="flex flex-col items-center"><div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center"><i class="fas fa-cogs text-4xl text-blue-500"></i></div><span class="mt-2 font-semibold">Mechanische Energie</span></div>
-                            <i class="fas fa-chevron-right text-2xl text-gray-400"></i>
-                             <div class="flex flex-col items-center"><div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-bolt text-4xl text-green-500"></i></div><span class="mt-2 font-semibold">Elektrische Energie</span></div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-200 p-6 rounded-lg flex flex-col items-center justify-center text-center">
-                         <h2 class="text-3xl font-semibold text-secondary-color mb-6">Energie wird umgewandelt, nicht "erzeugt"</h2>
-                         <i class="fas fa-sync-alt text-8xl text-primary-color animate-spin [animation-duration:10s]"></i>
-                         <div class="key-takeaway mt-8 w-full">
-                            <h3>Bedeutung für Kraftwerke:</h3>
-                            <ul class="list-disc list-inside mt-2 text-lg">
-                                <li>Kraftwerke sind Energie-Umwandler.</li>
-                                <li>Der Wirkungsgrad beschreibt die Effizienz dieser Umwandlung – ein Teil geht immer als Wärme verloren.</li>
-                            </ul>
-                        </div>
-                    </div>
-                 </div>
+    <!-- Slide 1: Cover Page -->
+    <div class="slide slide-1 active" id="slide-1">
+        <img alt="Power transmission towers at sunset" class="bg-image" src="https://picture-search.skywork.ai/aippt/image/sheet/b101b528869bc7ac793b5f8b533e9642.jpg"/>
+        <div class="overlay flex flex-col justify-center items-start px-20">
+            <div class="mb-6">
+                <h1 class="title-text text-6xl font-bold text-white mb-4">Physik der Kraftwerke</h1>
+                <h2 class="title-text text-4xl font-semibold text-blue-300">Energieerzeugung und Umwandlung</h2>
             </div>
-        </div>
-
-        <div class="slide">
-            <header class="slide-header">Konventionelle Kraftwerke: Thermodynamik</header>
-            <div class="slide-content">
-                <h2 class="text-3xl font-semibold text-secondary-color mb-6 text-center">Der Dampfkreislauf in Wärmekraftwerken</h2>
-                <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center">
-                        <div class="space-y-4 text-xl">
-                            <div class="flex items-center"><div class="w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">1</div><p><strong class="font-semibold">Verbrennung:</strong> Chemische Energie (Kohle, Gas) wird in Wärme umgewandelt.</p></div>
-                             <div class="flex items-center"><div class="w-12 h-12 bg-yellow-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">2</div><p><strong class="font-semibold">Dampferzeugung:</strong> Die Wärme erhitzt Wasser zu Hochdruck-Wasserdampf.</p></div>
-                             <div class="flex items-center"><div class="w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">3</div><p><strong class="font-semibold">Turbine & Generator:</strong> Der Dampf treibt eine Turbine an, die mit einem Generator Strom erzeugt.</p></div>
-                             <div class="flex items-center"><div class="w-12 h-12 bg-teal-500 text-white rounded-full flex items-center justify-center mr-4 text-2xl">4</div><p><strong class="font-semibold">Kondensation:</strong> Der Dampf wird gekühlt (Kühlturm), kondensiert zu Wasser und der Kreislauf beginnt von neuem.</p></div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/07eaee4dc39d0190d25ba22f5a4307af.jpg" class="rounded-lg shadow-lg object-cover h-64 w-full mb-4">
-                        <div class="key-takeaway w-full">
-                            <h3>Physikalische Prinzipien</h3>
-                            <ul class="list-disc list-inside mt-2 text-lg">
-                                <li><strong>Thermodynamik:</strong> Die Lehre der Wärme und ihrer Umwandlung in andere Energieformen.</li>
-                                <li><strong>Phasenübergang:</strong> Die Umwandlung von Wasser zu Dampf ist entscheidend, um Wärme in mechanische Energie zu überführen.</li>
-                                <li><strong>Wirkungsgrad:</strong> Konventionelle Kraftwerke haben einen Wirkungsgrad von ca. 30-60%. Der Rest ist Abwärme.</li>
-                            </ul>
-                        </div>
-                    </div>
+            <div class="content-box p-6 rounded-r-lg max-w-2xl mt-8">
+                <p class="text-white text-xl mb-4">Eine Übersicht über physikalische Prinzipien verschiedener Kraftwerkstypen</p>
+                <div class="flex items-center text-blue-300">
+                    <i class="fas fa-lightbulb mr-3 text-yellow-400"></i>
+                    <p class="text-lg">Von konventionellen Wärmekraftwerken bis zu erneuerbaren Energien</p>
                 </div>
             </div>
-        </div>
-        
-        <div class="slide">
-             <header class="slide-header">Kernkraftwerke: Kernspaltung & Kettenreaktion</header>
-             <div class="slide-content">
-                <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Physik der Kernspaltung</h2>
-                        <ul class="space-y-4 text-xl">
-                            <li class="flex items-start"><i class="fas fa-atom text-yellow-500 text-2xl mr-3 mt-1"></i><span>Ein schwerer Atomkern (z.B. Uran-235) wird durch ein Neutron beschossen und zerfällt in kleinere Teile.</span></li>
-                            <li class="flex items-start"><i class="fas fa-bolt text-yellow-500 text-2xl mr-3 mt-1"></i><span>Dabei wird eine enorme Menge Energie (Bindungsenergie) als Wärme freigesetzt.</span></li>
-                            <li class="flex items-start"><i class="fas fa-project-diagram text-yellow-500 text-2xl mr-3 mt-1"></i><span>Zusätzlich werden neue Neutronen freigesetzt, die weitere Kerne spalten können – eine <strong class="font-semibold">Kettenreaktion</strong> entsteht.</span></li>
-                            <li class="flex items-start"><i class="fas fa-cogs text-yellow-500 text-2xl mr-3 mt-1"></i><span>Im Reaktor wird diese Kettenreaktion kontrolliert, um die Wärme zur Dampferzeugung zu nutzen.</span></li>
-                        </ul>
-                    </div>
-                    <div class="bg-gray-200 p-6 rounded-lg flex flex-col items-center justify-center">
-                        <h3 class="text-2xl font-semibold mb-4 text-center">Vereinfachte Kettenreaktion</h3>
-                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/e751f9bc5fad9f6adbaf31dd11b0f548.jpg" class="rounded-lg shadow-lg object-contain h-auto w-full mb-4">
-                        <p class="text-center text-lg mt-2">Die freigesetzte Wärme eines Kernkraftwerks wird genutzt, um einen thermodynamischen Kreislauf (wie im Wärmekraftwerk) anzutreiben.</p>
-                    </div>
-                </div>
+            <div class="absolute bottom-10 left-20 flex items-center">
+                <div class="w-12 h-1 bg-blue-500 mr-4"></div>
+                <p class="text-gray-300 text-lg">10 Folien zur Physik moderner Energieerzeugung</p>
             </div>
-        </div>
-
-        <div class="slide">
-            <header class="slide-header">Wasserkraftwerke: Potentielle & Kinetische Energie</header>
-            <div class="slide-content">
-                 <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center pr-8">
-                         <h2 class="text-3xl font-semibold text-secondary-color mb-6">Physikalische Grundlagen</h2>
-                         <div class="mb-6">
-                            <h3 class="text-2xl text-yellow-600 font-semibold">Potentielle Energie (Lageenergie)</h3>
-                            <p class="text-xl mt-2">Ein Stausee speichert Wasser in großer Höhe. Diese gespeicherte Energie ($E_{pot} = m \cdot g \cdot h$) ist die Grundlage für Speicherkraftwerke.</p>
-                         </div>
-                         <div>
-                            <h3 class="text-2xl text-blue-600 font-semibold">Kinetische Energie (Bewegungsenergie)</h3>
-                            <p class="text-xl mt-2">Wenn das Wasser abfließt, wird potentielle in kinetische Energie ($E_{kin} = \frac{1}{2} \cdot m \cdot v^2$) umgewandelt. Diese Bewegungsenergie des Wassers treibt die Turbine an.</p>
-                         </div>
-                         <div class="key-takeaway mt-8">
-                            <h3>Höchste Effizienz</h3>
-                            <p class="text-lg mt-2">Wasserkraftwerke sind mit einem Wirkungsgrad von bis zu 90% die effizientesten Energieumwandler.</p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/048e970c028019b1b2ac5cdad246e2a7.jpg" class="rounded-lg shadow-lg object-cover w-full h-80 mb-6">
-                        <div class="grid grid-cols-2 gap-4 text-center">
-                            <div class="bg-blue-100 p-4 rounded-lg">
-                                <h4 class="text-xl font-semibold">Laufwasserkraftwerk</h4>
-                                <p>Nutzt die natürliche Strömung eines Flusses.</p>
-                            </div>
-                            <div class="bg-yellow-100 p-4 rounded-lg">
-                                <h4 class="text-xl font-semibold">Speicherkraftwerk</h4>
-                                <p>Nutzt aufgestautes Wasser aus einem Reservoir.</p>
-                            </div>
-                        </div>
-                    </div>
-                 </div>
+            <div class="absolute bottom-10 right-20">
+                <i class="fas fa-atom text-5xl text-blue-400 opacity-80"></i>
             </div>
-        </div>
-        
-        <div class="slide">
-             <header class="slide-header">Windkraftwerke: Aerodynamik & Rotationsmechanik</header>
-             <div class="slide-content">
-                <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center">
-                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/9a46f7ed2c042c2d79e6251f4d86cf4a.jpg" class="rounded-lg shadow-lg object-cover w-full h-80 mb-6">
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Vom Wind zum Strom</h2>
-                         <ul class="space-y-4 text-xl">
-                            <li class="flex items-start"><i class="fas fa-wind text-blue-500 text-2xl mr-3 mt-1"></i><div><strong class="font-semibold">Aerodynamik:</strong> Die Rotorblätter sind wie Flugzeugflügel geformt. Der Wind erzeugt durch Druckunterschiede an den Blättern Auftrieb, was zu einer Drehbewegung führt.</div></li>
-                            <li class="flex items-start"><i class="fas fa-sync-alt text-blue-500 text-2xl mr-3 mt-1"></i><div><strong class="font-semibold">Rotationsmechanik:</strong> Die Drehung wird über eine Welle und ein Getriebe (das die Drehzahl erhöht) an den Generator weitergeleitet.</div></li>
-                            <li class="flex items-start"><i class="fas fa-bolt text-blue-500 text-2xl mr-3 mt-1"></i><div><strong class="font-semibold">Induktion:</strong> Der Generator wandelt die mechanische Rotationsenergie durch elektromagnetische Induktion in elektrische Energie um.</div></li>
-                         </ul>
-                         <div class="key-takeaway mt-6">
-                            <h3>Wirkungsgrad</h3>
-                            <p class="text-lg mt-2">Moderne Windkraftanlagen erreichen einen Wirkungsgrad von ca. 35-45%.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="slide">
-            <header class="slide-header">Solarkraftwerke: Der Photoelektrische Effekt</header>
-            <div class="slide-content">
-                 <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-4">Physik der Photovoltaik</h2>
-                        <p class="text-xl mb-6">Die direkte Umwandlung von Lichtenergie in elektrische Energie basiert auf dem photoelektrischen Effekt in Halbleitermaterialien (meist Silizium).</p>
-                        <ul class="space-y-3 text-lg">
-                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">1.</span><strong>Lichtabsorption:</strong> Sonnenlicht (Photonen) trifft auf die Solarzelle und überträgt seine Energie auf die Elektronen im Halbleiter.</li>
-                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">2.</span><strong>Elektronenanregung:</strong> Die Elektronen werden durch die Energie aus ihrer Bindung gelöst und können sich frei bewegen.</li>
-                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">3.</span><strong>Stromfluss:</strong> Ein eingebautes elektrisches Feld (p-n-Übergang) in der Solarzelle zwingt diese freien Elektronen, in eine Richtung zu fließen. Es entsteht Gleichstrom.</li>
-                           <li class="flex items-start"><span class="font-bold text-yellow-500 mr-3">4.</span><strong>Umwandlung:</strong> Ein Wechselrichter wandelt den erzeugten Gleichstrom in den für das Stromnetz benötigten Wechselstrom um.</li>
-                        </ul>
-                    </div>
-                    <div class="flex flex-col justify-center items-center bg-gray-200 p-6 rounded-lg">
-                        <img src="https://picture-search.skywork.ai/aippt/image/sheet/81a1abd0d777ee8b043690055c1ed74b.jpg" class="rounded-lg shadow-lg object-cover w-full h-64 mb-6">
-                         <div class="key-takeaway w-full">
-                            <h3>Wirkungsgrad von Solarzellen</h3>
-                            <p class="text-lg mt-2">Kommerzielle Photovoltaikanlagen wandeln heute etwa 15-22% des einfallenden Sonnenlichts in elektrische Energie um. Im Labor werden bereits höhere Werte erzielt.</p>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-        </div>
-        
-        <div class="slide">
-            <header class="slide-header">Wirkungsgrad & Energieverluste</header>
-            <div class="slide-content">
-                 <div class="grid grid-cols-2 gap-8 flex-grow">
-                    <div class="flex flex-col justify-center">
-                         <h2 class="text-3xl font-semibold text-secondary-color mb-4">Was ist der Wirkungsgrad?</h2>
-                         <p class="text-xl mb-4">Der Wirkungsgrad ($\eta$) ist das Verhältnis von nutzbarer Energie (Output) zu zugeführter Energie (Input). Er ist ein Maß für die Effizienz der Energieumwandlung.</p>
-                         <p class="text-xl bg-gray-200 p-4 rounded-lg text-center font-semibold">$\eta = \frac{E_{nutz}}{E_{zu}}$</p>
-                         <p class="text-xl mt-4">Ein Wirkungsgrad von 100% ist physikalisch unmöglich (2. Hauptsatz der Thermodynamik), da bei jeder realen Energieumwandlung ein Teil der Energie als nicht nutzbare Wärme an die Umgebung abgegeben wird.</p>
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <h2 class="text-3xl font-semibold text-secondary-color mb-6 text-center">Wirkungsgrade im Vergleich</h2>
-                        <div class="space-y-4">
-                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-green-600 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 90%"><span>Wasserkraft</span> <span>bis 90%</span></div></div>
-                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-blue-600 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 60%"><span>Gaskraftwerk (GuD)</span> <span>bis 60%</span></div></div>
-                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-teal-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 45%"><span>Windkraftwerk</span> <span>~45%</span></div></div>
-                             <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-gray-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 45%"><span>Kohlekraftwerk</span> <span>bis 45%</span></div></div>
-                            <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-indigo-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 35%"><span>Kernkraftwerk</span> <span>~35%</span></div></div>
-                             <div class="w-full bg-gray-200 rounded-full h-8"><div class="bg-yellow-500 h-8 rounded-full flex items-center justify-between px-4 text-white font-bold" style="width: 22%"><span>Solarkraftwerk (PV)</span> <span>~22%</span></div></div>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-        </div>
-
-        <div class="slide">
-             <header class="slide-header">Zukunftsperspektiven: Physik neuer Energietechnologien</header>
-             <div class="slide-content">
-                <div class="grid grid-cols-3 gap-6 flex-grow">
-                    <div class="bg-orange-100 p-6 rounded-lg border-l-4 border-orange-500">
-                        <h3 class="text-2xl font-semibold text-orange-800 mb-3 flex items-center"><i class="fas fa-atom mr-3"></i>Kernfusion</h3>
-                        <p class="mb-3">Die Energie der Sterne auf der Erde: Leichte Atomkerne (Deuterium, Tritium) verschmelzen bei extremen Temperaturen (>100 Mio. °C) und setzen gewaltige Energiemengen frei.</p>
-                         <p><strong class="font-semibold">Physik:</strong> Plasmaeindämmung durch starke Magnetfelder.</p>
-                    </div>
-                    <div class="bg-yellow-100 p-6 rounded-lg border-l-4 border-yellow-500">
-                        <h3 class="text-2xl font-semibold text-yellow-800 mb-3 flex items-center"><i class="fas fa-solar-panel mr-3"></i>Fortschrittliche PV</h3>
-                        <p class="mb-3">Steigerung der Effizienz durch neue Materialien und Konzepte, die ein breiteres Spektrum des Sonnenlichts nutzen.</p>
-                         <p><strong class="font-semibold">Physik:</strong> Mehrschicht-Solarzellen, Perowskite, Quantenpunkte.</p>
-                    </div>
-                    <div class="bg-green-100 p-6 rounded-lg border-l-4 border-green-500">
-                        <h3 class="text-2xl font-semibold text-green-800 mb-3 flex items-center"><i class="fas fa-battery-full mr-3"></i>Energiespeicherung</h3>
-                        <p class="mb-3">Der Schlüssel für eine 100% erneuerbare Versorgung, um die schwankende Verfügbarkeit von Wind und Sonne auszugleichen.</p>
-                         <p><strong class="font-semibold">Physik:</strong> Elektrochemie (Batterien), Elektrolyse (Wasserstoff), Thermische Speicher.</p>
-                    </div>
-                </div>
-                 <div class="key-takeaway mt-8">
-                    <h3>Der Weg in die Zukunft</h3>
-                    <p class="text-lg mt-2">Die nachhaltige Energieversorgung ist eine der größten Herausforderungen unserer Zeit. Innovative physikalische Konzepte und deren technische Anwendung sind der Schlüssel, um diese Herausforderung zu meistern und eine saubere, zuverlässige und bezahlbare Energiezukunft für alle zu schaffen.</p>
-                </div>
-            </div>
-        </div>
-        
-        <div id="nav-controls">
-            <div id="prev" class="nav-arrow mr-4"><i class="fas fa-chevron-left"></i></div>
-            <div id="slide-counter">1 / 10</div>
-            <div id="next" class="nav-arrow ml-4"><i class="fas fa-chevron-right"></i></div>
-        </div>
-        
-        <div id="progress-bar-container">
-            <div id="progress-bar"></div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const slides = document.querySelectorAll('.slide');
-            const prevButton = document.getElementById('prev');
-            const nextButton = document.getElementById('next');
-            const slideCounter = document.getElementById('slide-counter');
-            const progressBar = document.getElementById('progress-bar');
-            const presentationContainer = document.getElementById('presentation-container');
-            let currentSlide = 0;
+    <!-- Slide 2: Overview -->
+    <div class="slide slide-2" id="slide-2">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Überblick: Kraftwerke und Energieumwandlung</h1>
+        </div>
+        <div class="flex flex-1 flex-col"> <!-- Changed to flex-col to accommodate LLM feature -->
+            <div class="flex flex-1 flex-col md:flex-row"> <!-- Responsive columns -->
+                <div class="w-full md:w-1/2 md:pr-4 flex flex-col justify-center">
+                    <div class="content-box p-6 mb-6">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Grundprinzip aller Kraftwerke</h2>
+                        <p class="text-white text-lg mb-6">Kraftwerke sind Anlagen zur Umwandlung verschiedener Energieformen in elektrische Energie.</p>
+                        <div class="flex flex-wrap items-center justify-between my-8">
+                            <div class="bg-blue-700 bg-opacity-70 p-4 rounded-lg flex-1 min-w-0 flex flex-col items-center mx-1">
+                                <i class="fas fa-fire text-3xl text-yellow-400 mb-2"></i>
+                                <span class="text-white text-center">Primärenergie</span>
+                            </div>
+                            <div class="energy-flow-arrow flex-shrink-0 w-8 md:w-1/6 h-2"></div>
+                            <div class="bg-green-700 bg-opacity-70 p-4 rounded-lg flex-1 min-w-0 flex flex-col items-center mx-1">
+                                <i class="fas fa-cogs text-3xl text-gray-200 mb-2"></i>
+                                <span class="text-white text-center">Umwandlung</span>
+                            </div>
+                            <div class="energy-flow-arrow flex-shrink-0 w-8 md:w-1/6 h-2"></div>
+                            <div class="bg-blue-500 bg-opacity-70 p-4 rounded-lg flex-1 min-w-0 flex flex-col items-center mx-1">
+                                <i class="fas fa-bolt text-3xl text-yellow-300 mb-2"></i>
+                                <span class="text-white text-center">Elektrische Energie</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 md:pl-4">
+                    <div class="content-box p-6 h-full">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Hauptkategorien von Kraftwerken</h2>
+                        <div class="mb-6">
+                            <h3 class="text-xl text-yellow-400 mb-2 flex items-center">
+                                <i class="fas fa-industry mr-2"></i>
+                                Konventionelle Kraftwerke
+                            </h3>
+                            <div class="flex flex-wrap gap-2 ml-4">
+                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
+                                    <i class="fas fa-burn text-red-500 mr-2"></i>
+                                    <span class="text-white">Kohlekraftwerke</span>
+                                </div>
+                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
+                                    <i class="fas fa-fire-alt text-blue-400 mr-2"></i>
+                                    <span class="text-white">Gaskraftwerke</span>
+                                </div>
+                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
+                                    <i class="fas fa-atom text-green-400 mr-2"></i>
+                                    <span class="text-white">Kernkraftwerke</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl text-green-400 mb-2 flex items-center">
+                                <i class="fas fa-leaf mr-2"></i>
+                                Erneuerbare Energien
+                            </h3>
+                            <div class="flex flex-wrap gap-2 ml-4">
+                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
+                                    <i class="fas fa-water text-blue-300 mr-2"></i>
+                                    <span class="text-white">Wasserkraftwerke</span>
+                                </div>
+                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
+                                    <i class="fas fa-wind text-gray-300 mr-2"></i>
+                                    <span class="text-white">Windkraftwerke</span>
+                                </div>
+                                <div class="type-card bg-gray-800 bg-opacity-70 p-3 rounded-lg flex items-center">
+                                    <i class="fas fa-sun text-yellow-300 mr-2"></i>
+                                    <span class="text-white">Solarkraftwerke</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-2" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(2)">Frage stellen ✨</button>
+                    <div id="response-slide-2" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-2" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            const totalSlides = slides.length;
+    <!-- Slide 3: Energy Conservation -->
+    <div class="slide slide-3" id="slide-3">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Physikalisches Grundprinzip: Energieerhaltung</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row">
+                <div class="w-full md:w-1/2 md:pr-4">
+                    <div class="content-box p-6 h-full flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-blue-300 mb-4">Energieerhaltungssatz</h2>
+                            <p class="text-white text-lg mb-6">
+                                Energie kann weder erzeugt noch vernichtet, sondern nur von einer Form in eine andere umgewandelt werden.
+                            </p>
+                            <div class="bg-blue-900 bg-opacity-50 p-4 rounded-lg mb-6">
+                                <p class="text-white text-lg">
+                                    <i class="fas fa-quote-left text-blue-300 mr-2"></i>
+                                    In einem geschlossenen System bleibt die Gesamtenergie konstant.
+                                    <i class="fas fa-quote-right text-blue-300 ml-2"></i>
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-xl text-green-300 mb-3">Beispiel: Kohlekraftwerk</h3>
+                            <div class="flex flex-wrap items-center justify-between my-4">
+                                <div class="flex flex-col items-center flex-1 min-w-0 mx-1">
+                                    <div class="energy-icon bg-yellow-700">
+                                        <i class="fas fa-fire text-3xl text-yellow-400"></i>
+                                    </div>
+                                    <span class="text-white mt-2 text-center text-sm">Chemische Energie</span>
+                                </div>
+                                <div class="energy-arrow flex-shrink-0 w-8 md:w-10 h-2"></div>
+                                <div class="flex flex-col items-center flex-1 min-w-0 mx-1">
+                                    <div class="energy-icon bg-red-700">
+                                        <i class="fas fa-temperature-high text-3xl text-red-400"></i>
+                                    </div>
+                                    <span class="text-white mt-2 text-center text-sm">Wärmeenergie</span>
+                                </div>
+                                <div class="energy-arrow flex-shrink-0 w-8 md:w-10 h-2"></div>
+                                <div class="flex flex-col items-center flex-1 min-w-0 mx-1">
+                                    <div class="energy-icon bg-blue-700">
+                                        <i class="fas fa-cogs text-3xl text-blue-300"></i>
+                                    </div>
+                                    <span class="text-white mt-2 text-center text-sm">Mechanische Energie</span>
+                                </div>
+                                <div class="energy-arrow flex-shrink-0 w-8 md:w-10 h-2"></div>
+                                <div class="flex flex-col items-center flex-1 min-w-0 mx-1">
+                                    <div class="energy-icon bg-blue-500">
+                                        <i class="fas fa-bolt text-3xl text-yellow-300"></i>
+                                    </div>
+                                    <span class="text-white mt-2 text-center text-sm">Elektrische Energie</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 md:pl-4">
+                    <div class="content-box p-6 h-full flex flex-col items-center justify-center">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-6 text-center">Energie wird <span class="highlight-text">umgewandelt</span>, nicht erzeugt</h2>
+                        <div class="circular-flow relative mb-6">
+                            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                <div class="energy-icon bg-yellow-600">
+                                    <i class="fas fa-sun text-3xl text-yellow-300"></i>
+                                </div>
+                                <p class="text-white text-center mt-2">Solarenergie</p>
+                            </div>
+                            <div class="absolute top-1/2 right-0 transform translate-x-1/2 -translate-y-1/2">
+                                <div class="energy-icon bg-green-700">
+                                    <i class="fas fa-leaf text-3xl text-green-300"></i>
+                                </div>
+                                <p class="text-white text-center mt-2">Chemische Energie</p>
+                            </div>
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+                                <div class="energy-icon bg-blue-700">
+                                    <i class="fas fa-water text-3xl text-blue-300"></i>
+                                </div>
+                                <p class="text-white text-center mt-2">Potentielle Energie</p>
+                            </div>
+                            <div class="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2">
+                                <div class="energy-icon bg-red-700">
+                                    <i class="fas fa-fire-alt text-3xl text-red-400"></i>
+                                </div>
+                                <p class="text-white text-center mt-2">Wärmeenergie</p>
+                            </div>
+                            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-900 rounded-full h-24 w-24 flex items-center justify-center">
+                                <i class="fas fa-bolt text-4xl text-yellow-300"></i>
+                            </div>
+                        </div>
+                        <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg w-full">
+                            <h3 class="text-xl text-yellow-400 mb-2">Bedeutung für Kraftwerke:</h3>
+                            <ul class="text-white">
+                                <li class="flex items-start mb-2">
+                                    <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                                    <span>Kraftwerke erzeugen keine Energie, sondern wandeln sie um</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                                    <span>Der Wirkungsgrad beschreibt die Effizienz dieser Umwandlung</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-3" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(3)">Frage stellen ✨</button>
+                    <div id="response-slide-3" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-3" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            function updateSlide() {
-                slides.forEach((slide, index) => {
-                    if (index === currentSlide) {
-                        slide.classList.add('active');
-                    } else {
-                        slide.classList.remove('active');
-                    }
-                });
-                slideCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
-                progressBar.style.width = `${((currentSlide + 1) / totalSlides) * 100}%`;
-            }
+    <!-- Slide 4: Conventional Power Plants (Thermodynamics) -->
+    <div class="slide slide-4" id="slide-4">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Konventionelle Kraftwerke: Thermodynamik</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row gap-4">
+                <div class="w-full md:w-7/12 flex flex-col">
+                    <div class="content-box p-5 mb-4">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-3">Dampfkreislauf in Wärmekraftwerken</h2>
+                        <div class="flex flex-col">
+                            <div class="flex items-center justify-between mb-6 flex-wrap">
+                                <div class="process-step bg-red-800 bg-opacity-70 p-3 rounded-lg flex-1 min-w-[30%] flex flex-col items-center mx-1 my-1">
+                                    <i class="fas fa-fire text-2xl text-yellow-400 mb-2"></i>
+                                    <span class="text-white text-center text-sm">Verbrennung</span>
+                                    <span class="text-xs text-gray-300 mt-1">Chemische Energie → Wärme</span>
+                                </div>
+                                <div class="process-arrow flex-shrink-0 w-4 h-2 md:w-1/12 mx-1"></div>
+                                <div class="process-step bg-yellow-700 bg-opacity-70 p-3 rounded-lg flex-1 min-w-[30%] flex flex-col items-center mx-1 my-1">
+                                    <i class="fas fa-cloud text-2xl text-white mb-2"></i>
+                                    <span class="text-white text-center text-sm">Wasserdampf</span>
+                                    <span class="text-xs text-gray-300 mt-1">Hoher Druck &amp; Temperatur</span>
+                                </div>
+                                <div class="process-arrow flex-shrink-0 w-4 h-2 md:w-1/12 mx-1"></div>
+                                <div class="process-step bg-blue-700 bg-opacity-70 p-3 rounded-lg flex-1 min-w-[30%] flex flex-col items-center mx-1 my-1">
+                                    <i class="fas fa-cog text-2xl text-gray-300 mb-2 fa-spin"></i>
+                                    <span class="text-white text-center text-sm">Turbine</span>
+                                    <span class="text-xs text-gray-300 mt-1">Wärme → Mechanische Energie</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                                <div class="process-arrow transform rotate-90 h-8 w-2"></div>
+                            </div>
+                            <div class="flex items-center justify-between mt-2 flex-wrap">
+                                <div class="process-step bg-teal-700 bg-opacity-70 p-3 rounded-lg flex-1 min-w-[30%] flex flex-col items-center mx-1 my-1">
+                                    <i class="fas fa-recycle text-2xl text-green-300 mb-2"></i>
+                                    <span class="text-white text-center text-sm">Kondensation</span>
+                                    <span class="text-xs text-gray-300 mt-1">Dampf → Wasser</span>
+                                </div>
+                                <div class="process-arrow flex-shrink-0 w-4 h-2 md:w-1/12 mx-1 transform rotate-180"></div>
+                                <div class="process-step bg-blue-500 bg-opacity-70 p-3 rounded-lg flex-1 min-w-[30%] flex flex-col items-center mx-1 my-1">
+                                    <i class="fas fa-tint text-2xl text-blue-200 mb-2"></i>
+                                    <span class="text-white text-center text-sm">Wasser</span>
+                                    <span class="text-xs text-gray-300 mt-1">Kühlwasser</span>
+                                </div>
+                                <div class="process-arrow flex-shrink-0 w-4 h-2 md:w-1/12 mx-1 transform rotate-180"></div>
+                                <div class="process-step bg-green-700 bg-opacity-70 p-3 rounded-lg flex-1 min-w-[30%] flex flex-col items-center mx-1 my-1">
+                                    <i class="fas fa-bolt text-2xl text-yellow-300 mb-2"></i>
+                                    <span class="text-white text-center text-sm">Generator</span>
+                                    <span class="text-xs text-gray-300 mt-1">Mechanisch → Elektrisch</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-box p-5">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-3">Physikalische Prinzipien</h2>
+                        <div class="space-y-3">
+                            <div class="key-point pl-3 py-2">
+                                <h3 class="text-lg font-medium text-yellow-300">Druck-Temperatur-Beziehung</h3>
+                                <p class="text-white text-sm">Bei höherem Druck steigt die Siedetemperatur des Wassers. Der Dampf erhält mehr Energie und kann mehr Arbeit verrichten.</p>
+                            </div>
+                            <div class="key-point pl-3 py-2">
+                                <h3 class="text-lg font-medium text-yellow-300">Wärmeübertragung</h3>
+                                <p class="text-white text-sm">Wärmeenergie fließt stets vom wärmeren zum kälteren Körper (2. Hauptsatz der Thermodynamik).</p>
+                            </div>
+                            <div class="key-point pl-3 py-2">
+                                <h3 class="text-lg font-medium text-yellow-300">Thermischer Wirkungsgrad</h3>
+                                <p class="text-white text-sm">Kohlekraftwerke: bis zu 45%, Gas-und-Dampf-Kombikraftwerke: bis zu 60% der zugeführten Wärmeenergie wird in elektrische Energie umgewandelt.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-5/12 flex flex-col">
+                    <div class="mb-4">
+                        <img alt="Kühlturm eines Wärmekraftwerks" class="w-full h-auto rounded-lg shadow-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/07eaee4dc39d0190d25ba22f5a4307af.jpg"/>
+                        <p class="text-gray-300 text-xs mt-1 text-center">Kühltürme eines Wärmekraftwerks</p>
+                    </div>
+                    <div class="content-box p-5">
+                        <h2 class="text-xl font-semibold text-blue-300 mb-3">Funktionsweise Animation</h2>
+                        <div class="video-container">
+                            <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" data-sk-video-cover="https://picture-search.skywork.ai/aippt/image/sheet/11a25c81b4a16c6aead6584a05137cf9.jpg" frameborder="0" src="https://www.youtube.com/embed/HZfPUXo7D58" title="Erklärung Funktion Kohlekraftwerk"></iframe>
+                        </div>
+                        <p class="text-gray-300 text-xs mt-2 italic">Animierte Erklärung der Funktion eines Kohlekraftwerks</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-4" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(4)">Frage stellen ✨</button>
+                    <div id="response-slide-4" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-4" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            function nextSlide() {
-                currentSlide = (currentSlide + 1) % totalSlides;
-                updateSlide();
-            }
+    <!-- Slide 5: Nuclear Power Plants -->
+    <div class="slide slide-5" id="slide-5">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Kernkraftwerke: Kernspaltung und Kettenreaktion</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row gap-4">
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="content-box p-6 mb-4 flex-1">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Physik der Kernspaltung</h2>
+                        <ul class="text-white space-y-4">
+                            <li class="flex items-start">
+                                <i class="fas fa-atom text-yellow-400 mt-1 mr-3"></i>
+                                <span>Bei der <strong class="text-yellow-300">Kernspaltung</strong> werden Atomkerne von Uran gespalten, wodurch sehr viel Wärmeenergie freigesetzt wird.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-radiation text-yellow-400 mt-1 mr-3"></i>
+                                <span>Durch den Beschuss mit Neutronen zerfällt ein Urankern in zwei kleinere Kerne und setzt dabei 2-3 neue Neutronen und <strong class="text-yellow-300">Bindungsenergie</strong> frei.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-chart-line text-yellow-400 mt-1 mr-3"></i>
+                                <span>Bei einer <strong class="text-yellow-300">Kettenreaktion</strong> lösen diese neuen Neutronen weitere Spaltungen aus. Im Reaktor wird dieser Prozess kontrolliert.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-temperature-high text-yellow-400 mt-1 mr-3"></i>
+                                <span>Die erzeugte Wärme wird genutzt, um Wasser zu erhitzen und Wasserdampf zu erzeugen, der Turbinen antreibt.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="content-box p-4">
+                        <h3 class="text-xl text-blue-300 mb-2">Video: Physik der Kernspaltung</h3>
+                        <div class="video-container">
+                            <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" data-sk-video-cover="https://picture-search.skywork.ai/aippt/image/sheet/f22b4c020f8c70ad31d7d3518fc3e509.jpg" frameborder="0" src="https://www.youtube.com/embed/24UmCX_DGXE" title="Nuclear Fission Explained"></iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="content-box p-6 flex-1 flex flex-col justify-between">
+                        <div class="flex justify-center mb-4">
+                            <div class="relative w-full h-48"> <!-- Ensure image container has dimensions -->
+                                <img alt="Kernkraftwerk" class="w-full h-full object-cover rounded-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/e751f9bc5fad9f6adbaf31dd11b0f548.jpg"/>
+                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-center text-sm py-1">
+                                    Kernkraftwerk mit Kühlturm
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-900 bg-opacity-70 p-4 rounded-lg">
+                            <h3 class="text-xl text-blue-300 mb-4 text-center">Kettenreaktion - Vereinfacht</h3>
+                            <div class="flex justify-center items-center h-48 relative w-full"> <!-- Ensure animation container has dimensions -->
+                                <div class="absolute left-[20%] top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                    <div class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center border-4 border-gray-300">
+                                        <i class="fas fa-atom text-3xl text-white atom-pulse"></i>
+                                    </div>
+                                    <div class="text-center text-white mt-2">Uran</div>
+                                </div>
+                                <div class="absolute left-[30%] top-1/2 transform -translate-y-1/2">
+                                    <i class="fas fa-arrow-right text-yellow-400 text-2xl glow"></i>
+                                </div>
+                                <div class="absolute left-[40%] top-1/4 transform -translate-x-1/2">
+                                    <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                                        <i class="fas fa-circle text-sm text-white"></i>
+                                    </div>
+                                    <div class="text-center text-white mt-1 text-xs">Spaltprodukt</div>
+                                </div>
+                                <div class="absolute left-[40%] top-3/4 transform -translate-x-1/2">
+                                    <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                                        <i class="fas fa-circle text-sm text-white"></i>
+                                    </div>
+                                    <div class="text-center text-white mt-1 text-xs">Spaltprodukt</div>
+                                </div>
+                                <div class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                    <i class="fas fa-bolt text-4xl text-yellow-500 glow"></i>
+                                    <div class="text-center text-yellow-400 mt-1">Energie</div>
+                                </div>
+                                <div class="absolute left-[65%] top-1/3">
+                                    <div class="w-6 h-6 rounded-full bg-orange-500"></div>
+                                    <div class="text-center text-white mt-1 text-xs">Neutron</div>
+                                </div>
+                                <div class="absolute left-[65%] top-1/2">
+                                    <div class="w-6 h-6 rounded-full bg-orange-500"></div>
+                                    <div class="text-center text-white mt-1 text-xs">Neutron</div>
+                                </div>
+                                <div class="absolute left-[65%] top-2/3">
+                                    <div class="w-6 h-6 rounded-full bg-orange-500"></div>
+                                    <div class="text-center text-white mt-1 text-xs">Neutron</div>
+                                </div>
+                                <div class="absolute right-[15%] top-1/3">
+                                    <i class="fas fa-arrow-right text-yellow-400 text-xl"></i>
+                                </div>
+                                <div class="absolute right-[15%] top-1/2">
+                                    <i class="fas fa-arrow-right text-yellow-400 text-xl"></i>
+                                </div>
+                                <div class="absolute right-[15%] top-2/3">
+                                    <i class="fas fa-arrow-right text-yellow-400 text-xl"></i>
+                                </div>
+                                <div class="absolute right-[5%] top-1/3">
+                                    <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center border-2 border-gray-300">
+                                        <i class="fas fa-atom text-xl text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute right-[5%] top-1/2">
+                                    <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center border-2 border-gray-300">
+                                        <i class="fas fa-atom text-xl text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute right-[5%] top-2/3">
+                                    <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center border-2 border-gray-300">
+                                        <i class="fas fa-atom text-xl text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-5" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(5)">Frage stellen ✨</button>
+                    <div id="response-slide-5" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-5" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            function prevSlide() {
-                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-                updateSlide();
-            }
+    <!-- Slide 6: Hydropower Plants -->
+    <div class="slide slide-6" id="slide-6">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Wasserkraftwerke: Potentielle und kinetische Energie</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row gap-6">
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="content-box p-6 mb-4 flex-1">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Physikalische Grundlagen</h2>
+                        <div class="mb-6 flex items-start">
+                            <div class="w-12 flex justify-center mt-1">
+                                <i class="fas fa-arrow-down text-green-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl text-yellow-400">Potentielle Energie (Lageenergie)</h3>
+                                <p class="text-white text-lg">Energie durch Höhenunterschied: E<sub>pot</sub> = m·g·h</p>
+                                <p class="text-gray-300">Stauseen speichern Wasser in der Höhe</p>
+                            </div>
+                        </div>
+                        <div class="mb-6 flex items-start">
+                            <div class="w-12 flex justify-center mt-1">
+                                <i class="fas fa-arrow-right text-blue-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl text-yellow-400">Kinetische Energie (Bewegungsenergie)</h3>
+                                <p class="text-white text-lg">Energie des fließenden Wassers: E<sub>kin</sub> = ½·m·v²</p>
+                                <p class="text-gray-300">Strömungsgeschwindigkeit treibt Turbine an</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-12 flex justify-center mt-1">
+                                <i class="fas fa-tachometer-alt text-green-400 text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl text-yellow-400">Hoher Wirkungsgrad</h3>
+                                <p class="text-white text-lg">Bis zu 90% der Wasserenergie wird zu Strom</p>
+                                <p class="text-gray-300">Einer der effizientesten Kraftwerkstypen</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-box p-6">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Energieumwandlung</h2>
+                        <div class="flex flex-wrap justify-between items-center my-4">
+                            <div class="text-center flex-1 min-w-0 mx-1">
+                                <i class="fas fa-mountain physics-icon text-green-400"></i>
+                                <p class="text-white text-sm">Potentielle Energie</p>
+                            </div>
+                            <div class="energy-flow flex-shrink-0 w-8 md:w-16 h-2"></div>
+                            <div class="text-center flex-1 min-w-0 mx-1">
+                                <i class="fas fa-water physics-icon text-blue-400"></i>
+                                <p class="text-white text-sm">Kinetische Energie</p>
+                            </div>
+                            <div class="energy-flow flex-shrink-0 w-8 md:w-16 h-2"></div>
+                            <div class="text-center flex-1 min-w-0 mx-1">
+                                <i class="fas fa-sync physics-icon text-yellow-400"></i>
+                                <p class="text-white text-sm">Mechanische Energie</p>
+                            </div>
+                            <div class="energy-flow flex-shrink-0 w-8 md:w-16 h-2"></div>
+                            <div class="text-center flex-1 min-w-0 mx-1">
+                                <i class="fas fa-bolt physics-icon text-yellow-300"></i>
+                                <p class="text-white text-sm">Elektrische Energie</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 flex flex-col">
+                    <div class="flex-1 mb-4">
+                        <img alt="Wasserkraftwerk mit Staudamm" class="w-full h-auto object-cover rounded-lg shadow-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/048e970c028019b1b2ac5cdad246e2a7.jpg"/>
+                    </div>
+                    <div class="content-box p-6">
+                        <h3 class="text-xl font-semibold text-blue-300 mb-3">Kraftwerkstypen</h3>
+                        <div class="flex justify-between flex-wrap">
+                            <div class="w-full md:w-1/2 md:pr-3 mb-2 md:mb-0">
+                                <div class="bg-blue-900 bg-opacity-40 p-3 rounded-lg">
+                                    <h4 class="text-lg text-yellow-400 flex items-center">
+                                        <i class="fas fa-stream mr-2"></i>
+                                        Laufwasserkraftwerk
+                                    </h4>
+                                    <p class="text-white text-sm">Nutzt die natürliche Strömung eines Flusses</p>
+                                </div>
+                            </div>
+                            <div class="w-full md:w-1/2 md:pl-3">
+                                <div class="bg-blue-900 bg-opacity-40 p-3 rounded-lg">
+                                    <h4 class="text-lg text-yellow-400 flex items-center">
+                                        <i class="fas fa-database mr-2"></i>
+                                        Speicherkraftwerk
+                                    </h4>
+                                    <p class="text-white text-sm">Nutzt aufgestautes Wasser für Energieerzeugung</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-6" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(6)">Frage stellen ✨</button>
+                    <div id="response-slide-6" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-6" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            nextButton.addEventListener('click', nextSlide);
-            prevButton.addEventListener('click', prevSlide);
+    <!-- Slide 7: Wind Power Plants -->
+    <div class="slide slide-7" id="slide-7">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Windkraftwerke: Aerodynamik und Rotationsmechanik</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row gap-4">
+                <div class="w-full md:w-1/2 flex flex-col gap-4">
+                    <div class="content-box p-5 flex-1">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-3 flex items-center">
+                            <i class="fas fa-wind text-blue-200 mr-2"></i>
+                            Aerodynamik der Rotorblätter
+                        </h2>
+                        <ul class="text-white text-lg space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-angle-right text-green-400 mt-1.5 mr-2"></i>
+                                <span>Wind trifft auf die Rotorblätter und versetzt sie in Drehung</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-angle-right text-green-400 mt-1.5 mr-2"></i>
+                                <span>Rotorblätter nutzen den gleichen Auftriebseffekt wie Flugzeugflügel</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-angle-right text-green-400 mt-1.5 mr-2"></i>
+                                <span>Unterschiedlicher Luftdruck auf beiden Seiten erzeugt Drehbewegung</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="content-box p-5 flex-1">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-3 flex items-center">
+                            <i class="fas fa-cog text-yellow-300 mr-2 fa-spin"></i>
+                            Rotationsmechanik
+                        </h2>
+                        <ul class="text-white text-lg space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-angle-right text-green-400 mt-1.5 mr-2"></i>
+                                <span>Drehbewegung wird über eine Welle weitergeleitet</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-angle-right text-green-400 mt-1.5 mr-2"></i>
+                                <span>Ein Getriebe erhöht die Drehzahl für den Generator</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-angle-right text-green-400 mt-1.5 mr-2"></i>
+                                <span>Der Generator wandelt mechanische Energie in elektrische Energie um</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-blue-900 bg-opacity-60 p-3 rounded-lg">
+                        <p class="text-yellow-300 flex items-center">
+                            <i class="fas fa-lightbulb mr-2"></i>
+                            <span>Wirkungsgrad von Windkraftwerken: ca. 35-45%</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 flex flex-col gap-4">
+                    <div class="flex-1">
+                        <img alt="Wind turbines in field" class="w-full h-auto object-cover rounded-lg shadow-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/9a46f7ed2c042c2d79e6251f4d86cf4a.jpg"/>
+                    </div>
+                    <div class="flex-1 content-box p-3">
+                        <h3 class="text-xl text-blue-300 mb-2">Funktionsweise einer Windkraftanlage</h3>
+                        <div class="video-container">
+                            <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" data-sk-video-cover="https://picture-search.skywork.ai/aippt/image/sheet/7f77e8de22755892db14a563ddc5922a.jpg" frameborder="0" src="https://www.youtube.com/embed/6GpsZzPisZs" title="Windkraftanlage Funktionsweise"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-7" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(7)">Frage stellen ✨</button>
+                    <div id="response-slide-7" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-7" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight' || e.key === ' ') {
-                    e.preventDefault();
-                    nextSlide();
-                } else if (e.key === 'ArrowLeft') {
-                    e.preventDefault();
-                    prevSlide();
-                }
-            });
-            
-            function resizePresentation() {
-                const containerWidth = presentationContainer.parentElement.clientWidth;
-                const containerHeight = presentationContainer.parentElement.clientHeight;
-                const scaleX = containerWidth / 1280;
-                const scaleY = containerHeight / 720;
-                const scale = Math.min(scaleX, scaleY);
-                presentationContainer.style.setProperty('--scale', scale);
-                 presentationContainer.style.left = `${(containerWidth - 1280 * scale) / 2}px`;
-                presentationContainer.style.top = `${(containerHeight - 720 * scale) / 2}px`;
-            }
+    <!-- Slide 8: Solar Power Plants -->
+    <div class="slide slide-8" id="slide-8">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Solarkraftwerke: Photoelektrischer Effekt</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row gap-6">
+                <div class="w-full md:w-1/2">
+                    <div class="content-box p-6 h-full flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-yellow-300 mb-4">
+                                <i class="fas fa-sun mr-2"></i>
+                                Physik der Photovoltaik
+                            </h2>
+                            <ul class="text-white space-y-4">
+                                <li class="flex items-start">
+                                    <i class="fas fa-lightbulb text-yellow-400 mt-1 mr-3"></i>
+                                    <span><span class="text-blue-300 font-semibold">Lichtabsorption:</span> Sonnenlicht (Photonen) trifft auf Halbleitermaterial und überträgt Energie</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-bolt text-yellow-400 mt-1 mr-3"></i>
+                                    <span><span class="text-blue-300 font-semibold">Elektronenfreisetzung:</span> Photonen lösen Elektronen aus der Bindung und erzeugen Ladungsträger</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-microchip text-yellow-400 mt-1 mr-3"></i>
+                                    <span><span class="text-blue-300 font-semibold">Halbleiterphysik:</span> P-N-Übergang erzeugt elektrisches Feld, das die Elektronen zum Stromfluss zwingt</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-exchange-alt text-yellow-400 mt-1 mr-3"></i>
+                                    <span><span class="text-blue-300 font-semibold">Umwandlung:</span> Gleichstrom wird durch Wechselrichter in nutzbaren Wechselstrom umgewandelt</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="mt-4 bg-gray-800 bg-opacity-70 p-4 rounded-lg">
+                            <h3 class="text-lg text-blue-300 mb-2">Wirkungsgrad von Solarzellen</h3>
+                            <p class="text-white">Photovoltaikanlagen wandeln etwa <span class="text-yellow-400 font-bold">15-22%</span> des einfallenden Sonnenlichts in elektrische Energie um.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 flex flex-col gap-4">
+                    <div class="content-box p-4 flex-grow-0">
+                        <img alt="Photovoltaikanlage" class="w-full h-auto object-cover rounded-lg" src="https://picture-search.skywork.ai/aippt/image/sheet/81a1abd0d777ee8b043690055c1ed74b.jpg"/>
+                    </div>
+                    <div class="content-box p-4 flex-grow solar-cell-animation-box"> <!-- Applied new class -->
+                        <h3 class="text-xl text-blue-300 mb-3">Photoelektrischer Effekt</h3>
+                        <div class="relative h-full w-full"> <!-- Make this fill parent height -->
+                            <div class="absolute inset-0 flex">
+                                <div class="bg-blue-900 bg-opacity-50">
+                                    <span class="text-white opacity-70">P-Schicht</span>
+                                </div>
+                                <div class="bg-blue-700 bg-opacity-50">
+                                    <span class="text-white opacity-70">N-Schicht</span>
+                                </div>
+                            </div>
+                            <div class="absolute left-1/2 top-0 bottom-0 w-0.5 bg-yellow-400 transform -translate-x-0.5"></div>
+                            <div class="photon">
+                                <i class="fas fa-asterisk text-yellow-300 text-xl"></i>
+                            </div>
+                            <div class="electron">
+                                <i class="fas fa-minus-circle text-blue-300 text-lg"></i>
+                            </div>
+                            <div class="absolute right-4 top-1/2 transform -translate-y-1/2">
+                                <i class="fas fa-plug text-gray-300 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-box p-4 flex-grow">
+                        <h3 class="text-lg text-blue-300 mb-2">Video: Funktionsweise der Photovoltaik</h3>
+                        <div class="video-container">
+                            <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" data-sk-video-cover="https://picture-search.skywork.ai/aippt/image/sheet/75935c008e3d00a99f8c6b8c0a7beb3a.jpg" frameborder="0" src="https://www.youtube.com/embed/VMe_yyNNaoU"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-8" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(8)">Frage stellen ✨</button>
+                    <div id="response-slide-8" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-8" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            window.addEventListener('resize', resizePresentation);
-            resizePresentation();
-            updateSlide();
+    <!-- Slide 9: Efficiency and Energy Losses -->
+    <div class="slide slide-9" id="slide-9">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Wirkungsgrad und Energieverluste</h1>
+        </div>
+        <div class="flex flex-1 flex-col">
+            <div class="flex flex-1 flex-col md:flex-row gap-4">
+                <div class="w-full md:w-1/3">
+                    <div class="content-box p-6 h-full flex flex-col">
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-4">Physikalische Grundlagen</h2>
+                        <div class="mb-6">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-percentage text-yellow-400 mr-3 text-xl"></i>
+                                <h3 class="text-xl text-white">Was ist Wirkungsgrad?</h3>
+                            </div>
+                            <p class="text-gray-200 ml-8">Verhältnis zwischen nutzbarer Energie (Output) und zugeführter Energie (Input)</p>
+                        </div>
+                        <div class="mb-6">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-thermometer-half text-red-400 mr-3 text-xl"></i>
+                                <h3 class="text-xl text-white">Energieverluste</h3>
+                            </div>
+                            <p class="text-gray-200 ml-8">Unvermeidbare Verluste entstehen hauptsächlich als Wärme an die Umgebung</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-ban text-red-500 mr-3 text-xl"></i>
+                                <h3 class="text-xl text-white">Physikalische Grenzen</h3>
+                            </div>
+                            <p class="text-gray-200 ml-8">100% Wirkungsgrad ist physikalisch unmöglich (Energieerhaltungssatz, 2. Hauptsatz der Thermodynamik)</p>
+                        </div>
+                        <div class="mt-auto">
+                            <div class="flex items-center">
+                                <i class="fas fa-lightbulb text-yellow-300 mr-2"></i>
+                                <p class="text-gray-300 text-sm italic">Ein hoher Wirkungsgrad schont Ressourcen und reduziert Umweltbelastungen</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-2/3">
+                    <div class="content-box p-6 h-full flex flex-col"> <!-- Added flex-col to make content stretch -->
+                        <h2 class="text-2xl font-semibold text-blue-300 mb-2">Wirkungsgrad verschiedener Kraftwerkstypen</h2>
+                        <p class="text-gray-300 mb-4">Maximal erreichbare Wirkungsgrade in Prozent (%)</p>
+                        <div class="chart-container flex-grow" id="efficiency-chart"></div> <!-- Flex-grow for the chart to fill space -->
+                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4"> <!-- Responsive grid for indicators -->
+                            <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-white"><i class="fas fa-water text-blue-300 mr-2"></i>Wasserkraftwerk</span>
+                                    <span class="text-green-400 font-bold">bis zu 90%</span>
+                                </div>
+                                <div class="efficiency-indicator">
+                                    <div class="efficiency-fill bg-green-500" style="width: 90%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Spitzenreiter bei der Energieumwandlung</p>
+                            </div>
+                            <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-white"><i class="fas fa-fire-alt text-blue-400 mr-2"></i>Gaskraftwerk (GuD)</span>
+                                    <span class="text-blue-400 font-bold">bis zu 60%</span>
+                                </div>
+                                <div class="efficiency-indicator">
+                                    <div class="efficiency-fill bg-blue-500" style="width: 60%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Effizientester konventioneller Kraftwerkstyp</p>
+                            </div>
+                            <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-white"><i class="fas fa-sun text-yellow-300 mr-2"></i>Solarkraftwerk (PV)</span>
+                                    <span class="text-yellow-500 font-bold">ca. 15-22%</span>
+                                </div>
+                                <div class="efficiency-indicator">
+                                    <div class="efficiency-fill bg-yellow-500" style="width: 22%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Technologisch bedingte Begrenzung</p>
+                            </div>
+                            <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-white"><i class="fas fa-atom text-green-400 mr-2"></i>Kernkraftwerk</span>
+                                    <span class="text-gray-300 font-bold">ca. 33-35%</span>
+                                </div>
+                                <div class="efficiency-indicator">
+                                    <div class="efficiency-fill bg-gray-500" style="width: 35%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Viel Abwärme muss abgeführt werden</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gemini API Feature -->
+            <div class="mt-6">
+                <div class="content-box p-4">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-3">Frage zur Folie stellen ✨</h3>
+                    <textarea id="question-slide-9" class="w-full p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" placeholder="Stellen Sie hier Ihre Frage zur aktuellen Folie..."></textarea>
+                    <button class="nav-button mt-3 w-auto px-6 py-2" onclick="askGeminiQuestion(9)">Frage stellen ✨</button>
+                    <div id="response-slide-9" class="gemini-response-area hidden"></div>
+                    <div id="loading-slide-9" class="loading-indicator">Antwort wird generiert... <i class="fas fa-spinner fa-spin ml-2"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Future Perspectives -->
+    <div class="slide slide-10" id="slide-10">
+        <div class="title-bar py-3 px-6 mb-6">
+            <h1 class="text-4xl font-bold text-white">Zukunftsperspektiven: Physik neuer Energietechnologien</h1>
+        </div>
+        <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6"> <!-- Responsive grid -->
+            <div class="tech-card fusion p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-orange-600 bg-opacity-30 mr-4">
+                        <i class="fas fa-atom text-3xl text-orange-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-white">Kernfusion</h2>
+                </div>
+                <p class="text-gray-200 mb-4">Die Physik der Sterne auf der Erde: Verschmelzung leichter Atomkerne zu schwereren.</p>
+                <ul class="text-gray-300 space-y-2 mb-4">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Nutzung elektromagnetischer Felder zur Plasmaeindämmung</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Temperaturen von über 100 Millionen °C nötig</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Deuterium und Tritium als Brennstoffe</span>
+                    </li>
+                </ul>
+                <div class="mt-auto">
+                    <div class="text-sm text-orange-300">
+                        <i class="fas fa-lightbulb mr-1"></i>
+                        Potenzial: Praktisch unerschöpfliche Energiequelle
+                    </div>
+                </div>
+            </div>
+            <div class="tech-card photovoltaik p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-yellow-600 bg-opacity-30 mr-4">
+                        <i class="fas fa-solar-panel text-3xl text-yellow-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-white">Fortschrittliche Photovoltaik</h2>
+                </div>
+                <p class="text-gray-200 mb-4">Weiterentwicklung des photoelektrischen Effekts für höhere Wirkungsgrade.</p>
+                <ul class="text-gray-300 space-y-2 mb-4">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Mehrschicht-Solarzellen mit breiteren Absorptionsspektren</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Perowskit-basierte Materialien als kostengünstige Alternative</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Quantenpunkt-Solarzellen für bessere Energieumwandlung</span>
+                    </li>
+                </ul>
+                <div class="mt-auto">
+                    <div class="text-sm text-yellow-300">
+                        <i class="fas fa-lightbulb mr-1"></i>
+                        Ziel: Wirkungsgrade über 40% statt heutiger 15-22%
+                    </div>
+                </div>
+            </div>
+            <div class="tech-card speicherung p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-green-600 bg-opacity-30 mr-4">
+                        <i class="fas fa-battery-full text-3xl text-green-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-white">Energiespeicherung</h2>
+                </div>
+                <p class="text-gray-200 mb-4">Physikalische Lösungen zur Überbrückung der Verfügbarkeitslücke erneuerbarer Energien.</p>
+                <ul class="text-gray-300 space-y-2 mb-4">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Fortschrittliche elektrochemische Batterien mit höherer Energiedichte</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Wasserstofftechnologie als chemischer Energiespeicher</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                        <span>Thermische Speicherung für Solarkraftwerke</span>
+                    </li>
+                </ul>
+                <div class="mt-auto">
+                    <div class="text-sm text-green-300">
+                        <i class="fas fa-lightbulb mr-1"></i>
+                        Schlüsseltechnologie für 100% erneuerbare Energieversorgung
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-6 bg-blue-900 bg-opacity-50 p-4 rounded-lg">
+            <p class="text-center text-white text-lg">
+                Der Weg zu einer nachhaltigen Energieversorgung führt über innovative physikalische Konzepte und deren praktische Anwendung.
+                Die Zukunft liegt in erneuerbaren Energien, die durch neue Technologien effizienter und zuverlässiger werden.
+            </p>
+        </div>
+    </div>
+
+    <!-- Slide 11: End Page -->
+    <div class="slide slide-end" id="slide-11">
+        <div class="flex flex-col items-center justify-center h-full text-center">
+            <h1 class="text-6xl font-bold text-white mb-8 end-message">ENDE</h1>
+            <p class="text-3xl text-blue-300 questions-text">Gibt es noch Fragen?</p>
+            <div class="mt-12">
+                <i class="fas fa-question-circle text-yellow-400 text-7xl animate-pulse"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Navigation Controls -->
+<div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4 z-20">
+    <button id="prevBtn" class="nav-button">
+        <i class="fas fa-arrow-left mr-2"></i> Zurück
+    </button>
+    <div id="pageNumber" class="w-16 h-12 rounded-full bg-blue-700 flex items-center justify-center text-white font-bold text-lg shadow-md">1 / 11</div>
+    <button id="nextBtn" class="nav-button">
+        Weiter <i class="fas fa-arrow-right ml-2"></i>
+    </button>
+</div>
+
+<!-- Fullscreen Button -->
+<button id="fullscreenBtn" class="fullscreen-button">
+    <i class="fas fa-expand mr-2"></i> Vollbild
+</button>
+
+<script>
+    let currentSlideIndex = 0; // Start at the first slide (index 0)
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageNumber = document.getElementById('pageNumber');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const slidesContainer = document.getElementById('slides-container');
+
+    // Function to show a specific slide
+    function showSlide(index) {
+        // Hide all slides
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+            slide.style.opacity = 0; // Ensure opacity is 0 for hidden slides
+            slide.style.zIndex = 1; // Reset z-index
         });
-    </script>
+
+        // Show the current slide
+        if (slides[index]) {
+            slides[index].classList.add('active');
+            slides[index].style.opacity = 1; // Set opacity to 1 for active slide
+            slides[index].style.zIndex = 10; // Bring to front
+
+            // Update page number
+            pageNumber.textContent = `${index + 1} / ${slides.length}`;
+
+            // Disable/enable navigation buttons
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === slides.length - 1;
+
+            // Handle D3.js chart rendering for slide 9
+            if (index === 8) { // Assuming slide 9 is at index 8 (0-indexed)
+                renderEfficiencyChart();
+            }
+
+            // Clear previous LLM responses and hide sections for other slides
+            for (let i = 2; i <= 10; i++) {
+                const responseDiv = document.getElementById(`response-slide-${i}`);
+                if (responseDiv) {
+                    responseDiv.innerHTML = '';
+                    responseDiv.classList.add('hidden');
+                }
+                const loadingDiv = document.getElementById(`loading-slide-${i}`);
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+                 const textarea = document.getElementById(`question-slide-${i}`);
+                if (textarea) {
+                    textarea.value = ''; // Clear textarea content
+                }
+            }
+        }
+    }
+
+    // Event listeners for navigation buttons
+    nextBtn.addEventListener('click', () => {
+        if (currentSlideIndex < slides.length - 1) {
+            currentSlideIndex++;
+            showSlide(currentSlideIndex);
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentSlideIndex > 0) {
+            currentSlideIndex--;
+            showSlide(currentSlideIndex);
+        }
+    });
+
+    // Keyboard navigation (optional)
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') {
+            nextBtn.click();
+        } else if (e.key === 'ArrowLeft') {
+            prevBtn.click();
+        }
+    });
+
+    // D3.js Chart Rendering Function (from page_9.html)
+    function renderEfficiencyChart() {
+        const chartContainer = document.getElementById('efficiency-chart');
+        if (!chartContainer) return; // Exit if container not found
+
+        // Clear previous chart if any
+        chartContainer.innerHTML = '';
+
+        const efficiencyData = [
+            {type: "Wasserkraftwerk", efficiency: 90, color: "#10B981"},
+            {type: "Gaskraftwerk (GuD)", efficiency: 60, color: "#3B82F6"},
+            {type: "Kohlekraftwerk", efficiency: 45, color: "#6B7280"},
+            {type: "Windkraftwerk", efficiency: 45, color: "#6EE7B7"},
+            {type: "Kernkraftwerk", efficiency: 35, color: "#9CA3AF"},
+            {type: "Solarkraftwerk", efficiency: 22, color: "#FBBF24"}
+        ];
+
+        const margin = {top: 30, right: 30, bottom: 70, left: 60};
+        // Use clientWidth and clientHeight for responsive chart sizing
+        const width = chartContainer.clientWidth - margin.left - margin.right;
+        const height = chartContainer.clientHeight - margin.top - margin.bottom;
+
+        const svg = d3.select("#efficiency-chart")
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scaleBand()
+            .range([0, width])
+            .domain(efficiencyData.map(d => d.type))
+            .padding(0.2);
+
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .selectAll("text")
+                .attr("transform", "translate(-10,0)rotate(-45)")
+                .style("text-anchor", "end")
+                .style("fill", "#D1D5DB")
+                .style("font-size", "12px");
+
+        const y = d3.scaleLinear()
+            .domain([0, 100])
+            .range([height, 0]);
+
+        svg.append("g")
+            .call(d3.axisLeft(y).tickFormat(d => d + "%"))
+            .selectAll("text")
+                .style("fill", "#D1D5DB");
+
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .style("fill", "#D1D5DB")
+            .text("Wirkungsgrad (%)");
+
+        svg.selectAll("mybar")
+            .data(efficiencyData)
+            .enter()
+            .append("rect")
+                .attr("x", d => x(d.type))
+                .attr("width", x.bandwidth())
+                .attr("fill", d => d.color)
+                .attr("y", d => y(d.efficiency))
+                .attr("height", d => height - y(d.efficiency));
+
+        svg.selectAll(".text")
+            .data(efficiencyData)
+            .enter()
+            .append("text")
+                .attr("class", "bar-label")
+                .attr("x", d => x(d.type) + x.bandwidth()/2)
+                .attr("y", d => y(d.efficiency) - 5)
+                .text(d => d.efficiency + "%");
+    }
+
+    // Function to extract text content from the current slide for LLM
+    function getSlideContent(slideId) {
+        const slideElement = document.getElementById(`slide-${slideId}`);
+        if (!slideElement) return '';
+
+        let content = '';
+        // Extract titles and main paragraphs
+        const texts = slideElement.querySelectorAll('h1, h2, h3, p, li');
+        texts.forEach(text => {
+            content += text.textContent + '\n';
+        });
+        return content;
+    }
+
+    // Function to call Gemini API
+    async function askGeminiQuestion(slideNum) {
+        const questionInput = document.getElementById(`question-slide-${slideNum}`);
+        const responseDiv = document.getElementById(`response-slide-${slideNum}`);
+        const loadingDiv = document.getElementById(`loading-slide-${slideNum}`);
+        const userQuestion = questionInput.value.trim();
+
+        if (!userQuestion) {
+            responseDiv.innerHTML = '<span class="text-red-400">Bitte geben Sie eine Frage ein.</span>';
+            responseDiv.classList.remove('hidden');
+            return;
+        }
+
+        responseDiv.classList.add('hidden');
+        responseDiv.innerHTML = ''; // Clear previous response
+        loadingDiv.style.display = 'block'; // Show loading indicator
+
+        try {
+            const slideContent = getSlideContent(slideNum);
+            let chatHistory = [];
+            
+            // Provide a clear prompt for the LLM based on slide content and user question
+            let prompt = `Beantworten Sie die folgende Frage prägnant und basierend auf dem bereitgestellten Folieninhalt. Falls der Folieninhalt die Frage nicht direkt beantwortet, verwenden Sie allgemeines Wissen über die Physik von Kraftwerken, um eine relevante Antwort zu geben.
+
+Folieninhalt:
+${slideContent}
+
+Benutzerfrage: ${userQuestion}`;
+
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // Canvas will automatically provide the API key
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            
+            if (result.candidates && result.candidates.length > 0 &&
+                result.candidates[0].content && result.candidates[0].content.parts &&
+                result.candidates[0].content.parts.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                responseDiv.innerHTML = text;
+                responseDiv.classList.remove('hidden');
+            } else {
+                responseDiv.innerHTML = '<span class="text-red-400">Entschuldigung, ich konnte keine Antwort generieren. Bitte versuchen Sie es später erneut.</span>';
+                responseDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error calling Gemini API:', error);
+            responseDiv.innerHTML = '<span class="text-red-400">Fehler beim Abrufen der Antwort. Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es später erneut.</span>';
+            responseDiv.classList.remove('hidden');
+        } finally {
+            loadingDiv.style.display = 'none'; // Hide loading indicator
+        }
+    }
+
+    // Fullscreen functionality
+    fullscreenBtn.addEventListener('click', () => {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            if (slidesContainer.requestFullscreen) {
+                slidesContainer.requestFullscreen();
+            } else if (slidesContainer.mozRequestFullScreen) { /* Firefox */
+                slidesContainer.mozRequestFullScreen();
+            } else if (slidesContainer.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+                slidesContainer.webkitRequestFullscreen();
+            } else if (slidesContainer.msRequestFullscreen) { /* IE/Edge */
+                slidesContainer.msRequestFullscreen();
+            } else {
+                alert('Your browser does not support the Fullscreen API. You may need to manually enable full screen mode in your browser settings.');
+            }
+        }
+    });
+
+    // Update button text when entering/exiting fullscreen
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            fullscreenBtn.innerHTML = '<i class="fas fa-compress mr-2"></i> Vollbild beenden';
+        } else {
+            fullscreenBtn.innerHTML = '<i class="fas fa-expand mr-2"></i> Vollbild';
+        }
+        // Re-render D3 chart if slide 9 is active to adjust to new dimensions
+        if (currentSlideIndex === 8) {
+            renderEfficiencyChart();
+        }
+    });
+
+    // Initialize the presentation
+    document.addEventListener('DOMContentLoaded', () => {
+        showSlide(currentSlideIndex);
+    });
+
+    // Re-render D3 chart on window resize if slide 9 is active
+    window.addEventListener('resize', () => {
+        if (currentSlideIndex === 8) { // If slide 9 is currently active
+            renderEfficiencyChart();
+        }
+    });
+
+</script>
+
 </body>
 </html>
