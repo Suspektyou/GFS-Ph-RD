@@ -3,334 +3,646 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Dijkstra Algorithmus - IT Präsentation</title>
+    <title>Dijkstra Algorithmus - Interaktive Präsentation</title>
+    
+    <!-- Libraries laden -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+
     <style>
-        body, html { width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #e2e8f0; }
+        /* Grundlayout und Schrift */
+        body, html { 
+            width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0f172a; color: #e2e8f0; 
+        }
         
-        /* Slide Logic */
+        /* Folien-Übergänge (Fade & Scale) */
         .slide {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; transition: opacity 0.8s ease-in-out; pointer-events: none;
+            opacity: 0; transform: scale(0.95); pointer-events: none; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex; flex-direction: column; padding: 2rem; box-sizing: border-box;
+            background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
         }
-        .slide.active { opacity: 1; pointer-events: all; z-index: 10; }
+        .slide.active { opacity: 1; transform: scale(1); pointer-events: all; z-index: 10; }
 
-        /* UI Elements */
+        /* Glassmorphism Design (Die "Karten") */
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 1rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
         }
-        .highlight-text { color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+        .glass-panel:hover { border-color: rgba(255, 255, 255, 0.2); }
+
+        /* Text Highlights */
+        .highlight-text { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
         
-        /* Navigation */
+        /* Buttons */
         .nav-button {
-            background: rgba(56, 189, 248, 0.2); color: #38bdf8;
-            padding: 0.8rem 1.5rem; border-radius: 9999px;
-            cursor: pointer; transition: all 0.3s; border: 1px solid #38bdf8;
-            backdrop-filter: blur(5px);
+            background: rgba(56, 189, 248, 0.1); color: #38bdf8;
+            padding: 0.8rem 1.5rem; border-radius: 9999px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; border: 1px solid rgba(56, 189, 248, 0.3);
+            backdrop-filter: blur(4px); display: flex; align-items: center; gap: 8px;
         }
-        .nav-button:hover { background: rgba(56, 189, 248, 0.4); transform: scale(1.05); }
-        .nav-button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+        .nav-button:hover { background: rgba(56, 189, 248, 0.3); transform: translateY(-2px); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        .nav-button:active { transform: translateY(0); }
+        .nav-button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; filter: grayscale(1); }
 
-        /* Graph Visualization */
-        svg { width: 100%; height: 100%; }
-        .node circle { fill: #1e293b; stroke: #94a3b8; stroke-width: 3px; transition: all 0.5s; }
-        .node text { font-family: sans-serif; font-weight: bold; fill: white; pointer-events: none; font-size: 16px; }
-        .node.visited circle { fill: #10b981; stroke: #059669; } /* Green for visited */
-        .node.current circle { fill: #f59e0b; stroke: #d97706; transform: scale(1.2); } /* Orange for processing */
+        /* Graph SVG Styles */
+        svg { width: 100%; height: 100%; overflow: visible; }
+        .node circle { transition: all 0.5s ease; cursor: pointer; }
+        .node text { font-family: 'Segoe UI', sans-serif; font-weight: bold; pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
         
-        .link { stroke: #475569; stroke-width: 2px; transition: all 0.5s; }
-        .link-label { fill: #94a3b8; font-size: 14px; background: #0f172a; }
+        /* Tabellen Styles */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 0.5rem; font-size: 0.9rem; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background-color: rgba(15, 23, 42, 0.8); color: #38bdf8; position: sticky; top: 0; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        tr.highlight-row { background-color: rgba(56, 189, 248, 0.15); }
+        td.updated { color: #facc15; font-weight: bold; animation: pulse 1s infinite; }
 
-        /* Table Styling */
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; color: #cbd5e1; }
-        th, td { border: 1px solid #334155; padding: 10px; text-align: center; }
-        th { background-color: #1e293b; color: #38bdf8; }
-        tr.active-row { background-color: rgba(245, 158, 11, 0.2); }
-
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
+<!-- SLIDE 1: Intro -->
 <div class="slide active flex justify-center items-center text-center" id="slide-1">
-    <div class="absolute inset-0 z-0 opacity-20">
+    <div class="absolute inset-0 z-0 opacity-10">
+        <!-- Grid Background -->
         <svg width="100%" height="100%"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#38bdf8" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)" /></svg>
     </div>
-    <div class="z-10 relative">
-        <h1 class="text-7xl font-bold mb-6 text-white drop-shadow-lg"><span class="text-blue-500">Dijkstra</span> Algorithmus</h1>
-        <h2 class="text-3xl text-gray-300 mb-8 font-light">Der Weg ist das Ziel – <span class="highlight-text font-bold">nur schneller</span>.</h2>
-        <div class="glass-panel p-6 inline-block"><p class="text-xl text-blue-200"><i class="fas fa-terminal mr-2"></i> IT-Präsentation</p></div>
+    <div class="z-10 relative animate-fade-in-up">
+        <div class="inline-block mb-4 px-4 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-sm tracking-wider uppercase">Informatik Präsentation</div>
+        <h1 class="text-7xl font-extrabold mb-6 text-white drop-shadow-2xl tracking-tight">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Dijkstra</span> Algorithmus
+        </h1>
+        <h2 class="text-2xl text-slate-400 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
+            Wie Computer den <span class="text-white font-medium">schnellsten Weg</span> in einem Netzwerk finden.
+        </h2>
+        
+        <div class="flex justify-center gap-6">
+            <div class="glass-panel p-4 w-40 flex flex-col items-center hover:-translate-y-1">
+                <i class="fas fa-route text-3xl text-green-400 mb-2"></i>
+                <span class="text-sm font-bold">Routing</span>
+            </div>
+            <div class="glass-panel p-4 w-40 flex flex-col items-center hover:-translate-y-1">
+                <i class="fas fa-gamepad text-3xl text-purple-400 mb-2"></i>
+                <span class="text-sm font-bold">Games</span>
+            </div>
+            <div class="glass-panel p-4 w-40 flex flex-col items-center hover:-translate-y-1">
+                <i class="fas fa-network-wired text-3xl text-yellow-400 mb-2"></i>
+                <span class="text-sm font-bold">Netzwerke</span>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- SLIDE 2: Theorie -->
 <div class="slide" id="slide-2">
-    <h1 class="text-4xl font-bold text-blue-400 mb-8 border-b border-gray-700 pb-4">Was ist der Dijkstra-Algorithmus?</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 flex-1 items-center">
-        <div class="glass-panel p-8 h-full flex flex-col justify-center">
-            <ul class="space-y-6 text-xl">
-                <li class="flex items-start"><i class="fas fa-route mt-1 mr-4 text-green-400"></i><span>Löst das <strong>Kürzeste-Wege-Problem</strong>.</span></li>
-                <li class="flex items-start"><i class="fas fa-cookie-bite mt-1 mr-4 text-yellow-400"></i><span>Gehört zu <strong>Greedy-Algorithmen</strong> ("Gierig").</span></li>
-                <li class="flex items-start"><i class="fas fa-ban mt-1 mr-4 text-red-400"></i><span>Keine negativen Kantengewichte erlaubt.</span></li>
-                <li class="flex items-start"><i class="fas fa-map-marked-alt mt-1 mr-4 text-purple-400"></i><span>Basis für Routenplaner (Google Maps).</span></li>
-            </ul>
+    <h1 class="text-5xl font-bold text-white mb-2">Was ist das?</h1>
+    <h2 class="text-xl text-blue-400 mb-10">Grundlagen und Regeln</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 flex-1 items-center">
+        <div class="glass-panel p-10 h-full flex flex-col justify-center space-y-8 relative overflow-hidden">
+            <!-- Decorative Icon Background -->
+            <i class="fas fa-project-diagram absolute -right-10 -bottom-10 text-9xl text-white opacity-5"></i>
+            
+            <div class="flex items-start">
+                <div class="bg-blue-500/20 p-3 rounded-lg mr-4"><i class="fas fa-bullseye text-blue-400 text-xl"></i></div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Ziel</h3>
+                    <p class="text-slate-400">Findet den kürzesten Pfad von einem Startknoten zu allen anderen.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="bg-yellow-500/20 p-3 rounded-lg mr-4"><i class="fas fa-utensils text-yellow-400 text-xl"></i></div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Prinzip: Greedy</h3>
+                    <p class="text-slate-400">Der Algorithmus ist "gierig". Er wählt immer den Knoten, der momentan am nächsten liegt.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="bg-red-500/20 p-3 rounded-lg mr-4"><i class="fas fa-exclamation-triangle text-red-400 text-xl"></i></div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Wichtige Regel</h3>
+                    <p class="text-slate-400">Funktioniert <strong>NICHT</strong> mit negativen Kantengewichten (z.B. -5).</p>
+                </div>
+            </div>
         </div>
-        <div class="flex justify-center items-center"><i class="fas fa-network-wired text-9xl text-gray-700 opacity-50"></i></div>
+        
+        <!-- Interactive-looking Graphic placeholder -->
+        <div class="flex flex-col justify-center items-center glass-panel p-8 h-full bg-gradient-to-br from-slate-800 to-slate-900 border-none">
+            <div class="text-center mb-6">
+                <i class="fas fa-map-marked-alt text-6xl text-blue-500 mb-4 animate-bounce"></i>
+                <p class="text-lg font-semibold">Stell dir vor: Google Maps</p>
+                <p class="text-sm text-slate-500">Du willst von Nürnberg nach Kopenhagen.</p>
+            </div>
+            <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 w-2/3 shadow-[0_0_10px_#3b82f6]"></div>
+            </div>
+            <div class="flex justify-between w-full mt-2 text-xs text-slate-500 font-mono">
+                <span>Nürnberg</span>
+                <span>Berechne...</span>
+                <span>Kopenhagen</span>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- SLIDE 3: Ablauf -->
 <div class="slide" id="slide-3">
-    <h1 class="text-4xl font-bold text-blue-400 mb-6">Wie funktioniert es? (Begriffe)</h1>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full pb-10">
-        <div class="glass-panel p-6 flex flex-col items-center text-center"><div class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center text-3xl mb-4 font-bold">1</div><h3 class="text-2xl font-bold mb-2">Initialisierung</h3><p class="text-gray-300">Start = 0.<br>Alle anderen = &infin;.</p></div>
-        <div class="glass-panel p-6 flex flex-col items-center text-center"><div class="w-20 h-20 rounded-full bg-yellow-600 flex items-center justify-center text-3xl mb-4 font-bold">2</div><h3 class="text-2xl font-bold mb-2">Relaxation</h3><p class="text-gray-300">Ist der neue Weg kürzer als der alte?<br><code>Neu < Alt? -> Update!</code></p></div>
-        <div class="glass-panel p-6 flex flex-col items-center text-center"><div class="w-20 h-20 rounded-full bg-green-600 flex items-center justify-center text-3xl mb-4 font-bold">3</div><h3 class="text-2xl font-bold mb-2">Wähle Minimum</h3><p class="text-gray-300">Nimm immer den Knoten mit der kleinsten Distanz als nächstes.</p></div>
+    <h1 class="text-4xl font-bold text-white mb-12 text-center">Der Algorithmus in 3 Phasen</h1>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 h-full pb-10 px-10">
+        
+        <!-- Phase 1 -->
+        <div class="glass-panel p-8 flex flex-col items-center text-center group hover:bg-slate-800/80 transition-colors">
+            <div class="w-24 h-24 rounded-full bg-blue-500/20 border border-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <span class="text-4xl font-bold text-blue-400">1</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-3">Initialisierung</h3>
+            <p class="text-slate-400 leading-relaxed">
+                Setze Distanz zum Start auf <strong class="text-white">0</strong>.<br>
+                Setze alle anderen auf <strong class="text-white">Unendlich (∞)</strong>.<br>
+                Markiere alle als "unbesucht".
+            </p>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="glass-panel p-8 flex flex-col items-center text-center group hover:bg-slate-800/80 transition-colors">
+            <div class="w-24 h-24 rounded-full bg-yellow-500/20 border border-yellow-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                <span class="text-4xl font-bold text-yellow-400">2</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-3">Relaxation</h3>
+            <p class="text-slate-400 leading-relaxed">
+                Prüfe Nachbarn des aktuellen Knotens.<br>
+                Ist der Weg über hier kürzer?<br>
+                <code class="bg-slate-900 px-2 py-1 rounded text-yellow-300 text-sm block mt-2">Wenn (Neu < Alt) update!</code>
+            </p>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="glass-panel p-8 flex flex-col items-center text-center group hover:bg-slate-800/80 transition-colors">
+            <div class="w-24 h-24 rounded-full bg-green-500/20 border border-green-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(34,197,94,0.3)]">
+                <span class="text-4xl font-bold text-green-400">3</span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-3">Wähle Minimum</h3>
+            <p class="text-slate-400 leading-relaxed">
+                Wähle den unbesuchten Knoten mit der <strong>kleinsten</strong> Distanz.<br>
+                Wiederhole Phase 2.<br>
+                Bis alle besucht sind.
+            </p>
+        </div>
     </div>
 </div>
 
+<!-- SLIDE 4: Simulation -->
 <div class="slide" id="slide-4">
-    <div class="flex justify-between items-center mb-4">
-        <h1 class="text-3xl font-bold text-white">Live Simulation</h1>
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Live Simulation</h1>
+            <p class="text-slate-400 text-sm">Klicke dich Schritt für Schritt durch den Graphen.</p>
+        </div>
         <div class="flex gap-4">
-             <button class="nav-button bg-red-500/20 text-red-400 border-red-500" onclick="resetDijkstra()"><i class="fas fa-undo mr-2"></i> Reset</button>
-            <button id="step-btn" class="nav-button bg-green-500/20 text-green-400 border-green-500" onclick="nextStep()"><i class="fas fa-step-forward mr-2"></i> Nächster Schritt</button>
+             <button class="nav-button bg-red-500/10 text-red-400 border-red-500/50 hover:bg-red-500/30" onclick="resetDijkstra()">
+                 <i class="fas fa-undo"></i> Reset
+            </button>
+            <button id="step-btn" class="nav-button bg-green-500/10 text-green-400 border-green-500/50 hover:bg-green-500/30" onclick="nextStep()">
+                <i class="fas fa-play"></i> Nächster Schritt
+            </button>
         </div>
     </div>
-    <div class="flex flex-1 gap-6 h-full">
-        <div class="w-2/3 glass-panel relative" id="graph-container"></div>
-        <div class="w-1/3 flex flex-col gap-4">
-            <div class="glass-panel p-4 h-1/4 overflow-y-auto"><h3 class="text-blue-300 font-bold mb-2">Status</h3><p id="status-text" class="text-sm">Klicke "Nächster Schritt".</p></div>
-            <div class="glass-panel p-4 flex-1 overflow-auto"><h3 class="text-yellow-300 font-bold mb-2">Distanztabelle</h3><table id="dijkstra-table"><thead><tr><th>Knoten</th><th>Distanz</th><th>Vorgänger</th></tr></thead><tbody id="table-body"></tbody></table></div>
+
+    <div class="flex flex-1 gap-6 h-full overflow-hidden">
+        <!-- Linke Seite: Graph -->
+        <div class="w-2/3 glass-panel relative overflow-hidden bg-gradient-to-b from-slate-900/50 to-transparent" id="graph-container">
+            <!-- D3 Graph wird hier gerendert -->
+        </div>
+
+        <!-- Rechte Seite: Info & Tabelle -->
+        <div class="w-1/3 flex flex-col gap-4 h-full">
+            <!-- Status Box -->
+            <div class="glass-panel p-5 min-h-[120px] border-l-4 border-blue-500 flex flex-col justify-center">
+                <h3 class="text-blue-300 font-bold uppercase text-xs tracking-wider mb-1">Aktueller Status</h3>
+                <p id="status-text" class="text-lg text-white leading-snug">Warte auf Start...</p>
+            </div>
+            
+            <!-- Tabelle -->
+            <div class="glass-panel p-0 flex-1 overflow-hidden flex flex-col">
+                <div class="p-4 bg-slate-800/50 border-b border-white/10 flex justify-between items-center">
+                    <h3 class="text-yellow-400 font-bold"><i class="fas fa-table mr-2"></i>Distanztabelle</h3>
+                    <span class="text-xs text-slate-500">Automatische Updates</span>
+                </div>
+                <div class="overflow-auto flex-1 p-2">
+                    <table id="dijkstra-table">
+                        <thead><tr><th>Knoten</th><th>Kosten</th><th>Vorgänger</th></tr></thead>
+                        <tbody id="table-body">
+                            <!-- JS füllt das hier -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Legende -->
+            <div class="flex justify-between px-2 text-xs text-slate-400">
+                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-slate-700 border border-slate-500 mr-2"></span>Unbesucht</div>
+                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2 shadow-[0_0_8px_#f59e0b]"></span>Aktuell</div>
+                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span>Erledigt</div>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- SLIDE 5: Ergebnis -->
 <div class="slide" id="slide-5">
-    <h1 class="text-4xl font-bold text-green-400 mb-4">Ergebnis: Den Weg ablesen</h1>
-    <div class="flex flex-1 gap-6 h-full">
+    <h1 class="text-4xl font-bold text-white mb-2">Das Ergebnis</h1>
+    <h2 class="text-xl text-green-400 mb-8">Rückverfolgung (Backtracking)</h2>
+
+    <div class="flex flex-1 gap-8 h-full">
+        <!-- Ergebnis Graph -->
         <div class="w-1/2 glass-panel relative" id="result-graph-container"></div>
         
+        <!-- Erklärung -->
         <div class="w-1/2 flex flex-col justify-center gap-6">
-            <div class="glass-panel p-6">
-                <h2 class="text-2xl text-white font-bold mb-4"><i class="fas fa-search-location text-yellow-400"></i> Backtracking (Rückverfolgung)</h2>
-                <p class="text-xl text-gray-300 mb-4">Der Algorithmus ist fertig. Aber wo ist der Weg? Wir müssen <strong>rückwärts</strong> lesen.</p>
+            <div class="glass-panel p-8">
+                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-shoe-prints text-blue-400 mr-3"></i>Wie finden wir den Weg?</h3>
+                <p class="text-slate-300 mb-6">Die Tabelle ist fertig. Jetzt gehen wir vom Ziel <strong class="text-white">RÜCKWÄRTS</strong> zum Start.</p>
                 
-                <div class="bg-slate-800 p-4 rounded-lg border-l-4 border-blue-500">
-                    <ol class="list-decimal list-inside space-y-3 text-lg">
-                        <li>Start beim Ziel: <strong class="text-green-400">E</strong>.</li>
-                        <li>Wer war der Vorgänger von E? &rarr; <strong class="text-blue-300">C</strong>.</li>
-                        <li>Wer war der Vorgänger von C? &rarr; <strong class="text-blue-300">B</strong>.</li>
-                        <li>Wer war der Vorgänger von B? &rarr; <strong class="text-blue-300">A (Start)</strong>.</li>
-                    </ol>
+                <div class="space-y-3 relative">
+                    <!-- Line connecting dots -->
+                    <div class="absolute left-[15px] top-3 bottom-3 w-0.5 bg-slate-600"></div>
+                    
+                    <div class="flex items-center relative z-10">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-green-500 flex items-center justify-center font-bold text-green-500 mr-4">1</div>
+                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">Ziel ist <strong>E</strong>. Vorgänger war <span class="text-yellow-400 font-bold">C</span>.</div>
+                    </div>
+                    <div class="flex items-center relative z-10">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-blue-500 flex items-center justify-center font-bold text-blue-500 mr-4">2</div>
+                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">Gehe zu C. Vorgänger war <span class="text-yellow-400 font-bold">B</span>.</div>
+                    </div>
+                    <div class="flex items-center relative z-10">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-blue-500 flex items-center justify-center font-bold text-blue-500 mr-4">3</div>
+                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">Gehe zu B. Vorgänger war <span class="text-yellow-400 font-bold">A</span>.</div>
+                    </div>
+                    <div class="flex items-center relative z-10">
+                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center font-bold text-white mr-4">4</div>
+                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">A ist Start. <strong>Fertig!</strong></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="glass-panel p-6 text-center">
-                <h3 class="text-gray-400 uppercase text-sm tracking-wide mb-2">Finaler Pfad</h3>
-                <div class="text-4xl font-bold text-white mb-2">
-                    A &rarr; B &rarr; C &rarr; E
+            <!-- Final Stats -->
+            <div class="glass-panel p-6 text-center bg-gradient-to-r from-blue-900/40 to-slate-900/40 border-blue-500/30">
+                <h3 class="text-slate-400 uppercase text-xs tracking-widest mb-2">Finaler Pfad</h3>
+                <div class="text-3xl font-bold text-white mb-2 flex justify-center items-center gap-3">
+                    A <i class="fas fa-arrow-right text-sm text-slate-500"></i> B <i class="fas fa-arrow-right text-sm text-slate-500"></i> C <i class="fas fa-arrow-right text-sm text-slate-500"></i> E
                 </div>
-                <div class="text-2xl text-green-400">
-                    Gesamtkosten: <strong>250</strong>
+                <div class="inline-block bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-sm font-bold border border-green-500/30">
+                    Kosten: 250
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- SLIDE 6: Ende -->
 <div class="slide" id="slide-6">
-    <h1 class="text-4xl font-bold text-blue-400 mb-8">Zusammenfassung</h1>
-    <div class="glass-panel p-10 max-w-4xl mx-auto w-full">
-        <h2 class="text-2xl text-white mb-6">Das Wichtigste in Kürze:</h2>
-        <div class="space-y-4">
-            <div class="flex items-center p-4 bg-slate-800/50 rounded-lg"><i class="fas fa-check-circle text-green-400 text-2xl mr-4"></i><span class="text-lg">Dijkstra findet garantiert das Optimum (wenn Gewichte positiv).</span></div>
-            <div class="flex items-center p-4 bg-slate-800/50 rounded-lg"><i class="fas fa-history text-yellow-400 text-2xl mr-4"></i><span class="text-lg">Der Weg wird am Ende durch die <strong>Vorgänger</strong> rekonstruiert.</span></div>
-            <div class="flex items-center p-4 bg-slate-800/50 rounded-lg"><i class="fas fa-tachometer-alt text-red-400 text-2xl mr-4"></i><span class="text-lg">Sehr effizient und wird überall in der IT genutzt.</span></div>
+    <div class="flex flex-col justify-center items-center h-full text-center">
+        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-5xl text-white shadow-2xl mb-8 animate-bounce">
+            <i class="fas fa-check"></i>
         </div>
+        <h1 class="text-6xl font-bold text-white mb-6">Vielen Dank!</h1>
+        <p class="text-2xl text-slate-300 mb-12 font-light">Der schnellste Weg zum Applaus.</p>
+        
+        <div class="glass-panel p-8 max-w-2xl w-full text-left">
+            <h3 class="text-xl text-blue-400 font-bold mb-4 border-b border-white/10 pb-2">Zusammenfassung</h3>
+            <ul class="space-y-4">
+                <li class="flex items-center text-slate-200"><i class="fas fa-check-circle text-green-500 mr-3"></i> Dijkstra findet immer das Optimum (bei positiven Gewichten).</li>
+                <li class="flex items-center text-slate-200"><i class="fas fa-check-circle text-green-500 mr-3"></i> Grundlage für Navi, Internet-Routing & KI.</li>
+                <li class="flex items-center text-slate-200"><i class="fas fa-check-circle text-green-500 mr-3"></i> Effizienter als bloßes Raten (Brute Force).</li>
+            </ul>
+        </div>
+        
+        <p class="mt-12 text-slate-500 text-sm">Präsentation erstellt mit HTML, TailwindCSS & D3.js</p>
     </div>
 </div>
 
-<div class="fixed bottom-6 right-6 flex gap-4 z-50">
-    <button class="nav-button" onclick="changeSlide(-1)"><i class="fas fa-arrow-left"></i> Zurück</button>
-    <div class="bg-slate-800 text-white px-4 py-2 rounded-full flex items-center border border-slate-600" id="page-indicator">1 / 6</div>
-    <button class="nav-button" onclick="changeSlide(1)">Weiter <i class="fas fa-arrow-right"></i></button>
+<!-- Navigation Bar (Fixed Bottom) -->
+<div class="fixed bottom-0 left-0 w-full p-6 flex justify-between items-end pointer-events-none z-50">
+    <div class="pointer-events-auto">
+        <!-- Optional: Logo oder Name -->
+    </div>
+    <div class="flex gap-4 items-center pointer-events-auto bg-slate-900/80 backdrop-blur-md p-2 rounded-full border border-slate-700 shadow-2xl">
+        <button class="nav-button w-12 h-12 justify-center p-0 rounded-full" onclick="changeSlide(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <span class="text-slate-400 font-mono w-16 text-center select-none" id="page-indicator">1 / 6</span>
+        <button class="nav-button w-12 h-12 justify-center p-0 rounded-full" onclick="changeSlide(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
 </div>
 
 <script>
-    // Config
+    // --- KONFIGURATION & DATEN ---
     let currentSlide = 1;
     const totalSlides = 6;
     
-    // Graph Logic
+    // Graph Koordinaten (angepasst an Video Layout)
     const nodes = [
-        { id: 'A', x: 100, y: 200 }, { id: 'B', x: 300, y: 100 },
-        { id: 'C', x: 500, y: 100 }, { id: 'D', x: 300, y: 300 },
-        { id: 'E', x: 600, y: 250 }
-    ];
-    // Final solution hardcoded for "Result" slide visual
-    const finalPathEdges = [
-        {s:'A', t:'B'}, {s:'B', t:'C'}, {s:'C', t:'E'}
+        { id: 'A', x: 150, y: 250 }, 
+        { id: 'B', x: 350, y: 100 },
+        { id: 'C', x: 550, y: 100 }, 
+        { id: 'D', x: 350, y: 400 },
+        { id: 'E', x: 650, y: 300 }
     ];
     
     const links = [
-        { source: 'A', target: 'B', weight: 100 }, { source: 'A', target: 'D', weight: 50 },
-        { source: 'B', target: 'C', weight: 100 }, { source: 'D', target: 'E', weight: 250 },
-        { source: 'C', target: 'E', weight: 50 },  { source: 'D', target: 'B', weight: 80 },
-        { source: 'B', target: 'E', weight: 300 }
+        { source: 'A', target: 'B', weight: 100 }, 
+        { source: 'A', target: 'D', weight: 50 },
+        { source: 'B', target: 'C', weight: 100 }, 
+        { source: 'B', target: 'E', weight: 250 }, // Achtung: im Video war ein B->E Link
+        { source: 'D', target: 'B', weight: 100 }, // D nach B
+        { source: 'D', target: 'E', weight: 250 },
+        { source: 'C', target: 'E', weight: 50 }
     ];
 
-    // State for Simulation
-    let simNodes = JSON.parse(JSON.stringify(nodes));
-    simNodes.forEach(n => { n.dist = Infinity; n.pred = null; n.visited = false; });
-    simNodes[0].dist = 0;
+    // Status für Simulation
+    let simNodes = []; 
+    // Der Pfad für die Ergebnis-Folie (Hardcoded für Visualisierung)
+    const finalPathEdges = [
+        {s:'A', t:'B'}, {s:'B', t:'C'}, {s:'C', t:'E'}
+    ];
 
+    // --- NAVIGATION LOGIK ---
     function changeSlide(direction) {
-        document.getElementById(`slide-${currentSlide}`).classList.remove('active');
+        const prevSlide = document.getElementById(`slide-${currentSlide}`);
+        prevSlide.classList.remove('active');
+        
         currentSlide += direction;
         if (currentSlide < 1) currentSlide = 1;
         if (currentSlide > totalSlides) currentSlide = totalSlides;
-        document.getElementById(`slide-${currentSlide}`).classList.add('active');
+        
+        const nextSlide = document.getElementById(`slide-${currentSlide}`);
+        nextSlide.classList.add('active');
+        
         document.getElementById('page-indicator').innerText = `${currentSlide} / ${totalSlides}`;
         
-        if(currentSlide === 4) initSimGraph();
+        // Initialsierung spezieller Folien
+        if(currentSlide === 4) {
+            if(simNodes.length === 0) resetDijkstra(); // Nur beim ersten Mal oder Reset
+            else renderSimGraph(); // Sonst redraw status
+        }
         if(currentSlide === 5) initResultGraph();
     }
+    
+    // Key Navigation
+    document.addEventListener('keydown', (e) => {
+        if(e.key === "ArrowRight" || e.key === " ") changeSlide(1);
+        if(e.key === "ArrowLeft") changeSlide(-1);
+    });
 
-    // --- Slide 4: Simulation Render ---
-    function initSimGraph() {
-        renderGraph("#graph-container", simNodes, links, false);
-        updateTable();
-    }
-
+    // --- SIMULATION LOGIK (Slide 4) ---
+    
     function resetDijkstra() {
+        // Deep Copy & Reset
         simNodes = JSON.parse(JSON.stringify(nodes));
-        simNodes.forEach(n => { n.dist = Infinity; n.pred = null; n.visited = false; });
-        simNodes[0].dist = 0;
+        simNodes.forEach(n => { 
+            n.dist = Infinity; 
+            n.pred = null; 
+            n.visited = false; 
+        });
+        simNodes[0].dist = 0; // Start A
+        
         document.getElementById('step-btn').disabled = false;
-        document.getElementById('status-text').innerHTML = "Reset durchgeführt.";
-        initSimGraph();
+        document.getElementById('step-btn').innerHTML = '<i class="fas fa-play"></i> Start';
+        document.getElementById('step-btn').classList.remove('bg-slate-500/10', 'text-slate-400');
+        document.getElementById('step-btn').classList.add('bg-green-500/10', 'text-green-400');
+        
+        document.getElementById('status-text').innerHTML = "Initialisierung fertig.<br>Startknoten A hat Distanz 0.";
+        
+        renderSimGraph();
+        updateTable();
     }
 
     function nextStep() {
+        // 1. Finde unbesuchten Knoten mit kleinster Distanz
         const unvisited = simNodes.filter(n => !n.visited);
+        
+        // Check ob fertig
         if (unvisited.length === 0 || unvisited.every(n => n.dist === Infinity)) {
-            document.getElementById('status-text').innerHTML = "<span class='text-green-400'>FERTIG!</span> Weiter zur nächsten Folie für das Ergebnis.";
+            document.getElementById('status-text').innerHTML = "<span class='text-green-400 font-bold'><i class='fas fa-flag-checkered'></i> FERTIG!</span><br>Alle erreichbaren Knoten besucht.";
             document.getElementById('step-btn').disabled = true;
+            document.getElementById('step-btn').innerText = "Abgeschlossen";
+            document.getElementById('step-btn').classList.remove('bg-green-500/10', 'text-green-400');
+            document.getElementById('step-btn').classList.add('bg-slate-500/10', 'text-slate-400');
+            renderSimGraph();
             return;
         }
+
+        // Sortieren nach Distanz
         unvisited.sort((a, b) => a.dist - b.dist);
         const current = unvisited[0];
-        current.visited = true;
+        current.visited = true; // Markiere als besucht
 
-        // Neighbor logic
+        let updates = [];
+
+        // 2. Nachbarn prüfen (Relaxation)
         const neighbors = links.filter(l => l.source === current.id);
-        let info = `Bearbeite <strong>${current.id}</strong> (Kosten: ${current.dist}).<br>`;
+        
         neighbors.forEach(l => {
-            const target = simNodes.find(n => n.id === l.target);
-            if(!target.visited) {
+            const targetNode = simNodes.find(n => n.id === l.target);
+            if(!targetNode.visited) {
                 const newDist = current.dist + l.weight;
-                if(newDist < target.dist) {
-                    target.dist = newDist;
-                    target.pred = current.id;
-                    info += `-> Update ${target.id}: Neue Kosten ${newDist}.<br>`;
+                if(newDist < targetNode.dist) {
+                    targetNode.dist = newDist;
+                    targetNode.pred = current.id;
+                    updates.push(targetNode.id);
                 }
             }
         });
-        document.getElementById('status-text').innerHTML = info;
-        
-        // Re-render to show colors
-        renderGraph("#graph-container", simNodes, links, true, current.id);
-        updateTable();
+
+        // UI Updates
+        let statusMsg = `Bearbeite <strong class="text-amber-400">${current.id}</strong> (Kosten: ${current.dist}).<br>`;
+        if(updates.length > 0) {
+            statusMsg += `Update Nachbarn: <span class="text-yellow-300">${updates.join(', ')}</span> wurden verbessert.`;
+        } else {
+            statusMsg += `Keine Verbesserungen gefunden.`;
+        }
+        document.getElementById('status-text').innerHTML = statusMsg;
+        document.getElementById('step-btn').innerHTML = '<i class="fas fa-step-forward"></i> Nächster Schritt';
+
+        renderSimGraph(current.id);
+        updateTable(updates);
     }
 
-    function updateTable() {
+    // --- TABELLE RENDERN ---
+    function updateTable(highlightIds = []) {
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
+        
         simNodes.forEach(n => {
             const row = document.createElement('tr');
-            if(n.visited) row.classList.add('bg-slate-700');
-            const d = n.dist === Infinity ? "∞" : n.dist;
-            const p = n.pred ? n.pred : "-";
-            row.innerHTML = `<td>${n.id}</td><td>${d}</td><td>${p}</td>`;
+            if(n.visited) row.classList.add('bg-emerald-500/10', 'text-emerald-200'); // Besucht Style
+            
+            const distDisplay = n.dist === Infinity ? "∞" : n.dist;
+            const predDisplay = n.pred ? n.pred : "-";
+            
+            // Highlight Logik
+            let distClass = "";
+            if(highlightIds.includes(n.id)) distClass = "updated";
+            
+            row.innerHTML = `
+                <td class="font-bold text-white">${n.id}</td>
+                <td class="${distClass}">${distDisplay}</td>
+                <td>${predDisplay}</td>
+            `;
             tbody.appendChild(row);
         });
     }
 
-    // --- Slide 5: Result Render ---
+    // --- GRAPH RENDERING (D3.js) ---
+    function renderSimGraph(currentId = null) {
+        const containerId = "#graph-container";
+        const container = document.querySelector(containerId);
+        d3.select(containerId).selectAll("*").remove(); // Clear SVG
+        
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        
+        const svg = d3.select(containerId).append("svg")
+            .attr("width", w).attr("height", h)
+            .attr("viewBox", `0 0 ${w} ${h}`); // Responsive
+
+        // Pfeilspitzen Definition
+        svg.append("defs").append("marker")
+           .attr("id", "arrow")
+           .attr("viewBox", "0 -5 10 10")
+           .attr("refX", 28).attr("refY", 0)
+           .attr("markerWidth", 6).attr("markerHeight", 6)
+           .attr("orient", "auto")
+           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#475569");
+
+        // Kanten (Links)
+        svg.selectAll("line")
+           .data(links).enter().append("line")
+           .attr("stroke", "#475569")
+           .attr("stroke-width", 2)
+           .attr("marker-end", "url(#arrow)")
+           .attr("x1", d => getNode(d.source).x).attr("y1", d => getNode(d.source).y)
+           .attr("x2", d => getNode(d.target).x).attr("y2", d => getNode(d.target).y);
+        
+        // Gewicht Labels
+        svg.selectAll(".w-lbl")
+           .data(links).enter().append("text")
+           .attr("fill", "#94a3b8")
+           .attr("font-size", "12px")
+           .attr("background", "black") // Trick für Lesbarkeit
+           .attr("x", d => (getNode(d.source).x + getNode(d.target).x)/2)
+           .attr("y", d => (getNode(d.source).y + getNode(d.target).y)/2 - 8)
+           .text(d => d.weight);
+
+        // Knoten Gruppen
+        const g = svg.selectAll("g")
+           .data(simNodes).enter().append("g")
+           .attr("class", "node")
+           .attr("transform", d => `translate(${d.x},${d.y})`);
+        
+        // Kreise
+        g.append("circle")
+         .attr("r", 22)
+         .attr("fill", d => {
+             if (d.id === currentId) return "#f59e0b"; // Orange (Current)
+             if (d.visited) return "#10b981"; // Green (Visited)
+             return "#1e293b"; // Dark (Default)
+         })
+         .attr("stroke", d => d.id === currentId ? "#fbbf24" : "#e2e8f0")
+         .attr("stroke-width", d => d.id === currentId ? 3 : 2)
+         // Glow Effekt für aktiven Knoten
+         .attr("filter", d => d.id === currentId ? "drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))" : "");
+
+        // Knoten Text (ID)
+        g.append("text")
+         .attr("dy", 5)
+         .attr("text-anchor", "middle")
+         .attr("fill", "white")
+         .text(d => d.id);
+         
+        // Distanz Label (über dem Knoten)
+        g.append("text")
+         .attr("dy", -32)
+         .attr("text-anchor", "middle")
+         .attr("font-size", "14px")
+         .attr("font-weight", "bold")
+         .attr("fill", d => d.dist === Infinity ? "#64748b" : "#38bdf8")
+         .text(d => d.dist === Infinity ? "∞" : d.dist);
+         
+        function getNode(id) { return simNodes.find(n => n.id === id); }
+    }
+
+    // --- RESULT GRAPH (Slide 5) ---
     function initResultGraph() {
-        // Just render graph but highlight the final path edges hardcoded
         const containerId = "#result-graph-container";
         d3.select(containerId).selectAll("*").remove();
         const container = document.querySelector(containerId);
         const w = container.clientWidth, h = container.clientHeight;
         const svg = d3.select(containerId).append("svg").attr("width", w).attr("height", h);
-        
-        // Def Arrow
-        svg.append("defs").append("marker").attr("id", "arrowhead-res").attr("viewBox", "0 -5 10 10")
-           .attr("refX", 25).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
-           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#475569");
 
-        // Links
-        svg.selectAll(".link").data(links).enter().append("line")
+        // Marker Blau für Ergebnis
+        svg.append("defs").append("marker").attr("id", "arrow-res").attr("viewBox", "0 -5 10 10")
+           .attr("refX", 25).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
+           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#38bdf8"); // Hellblau
+
+        // Marker Grau normal
+        svg.append("defs").append("marker").attr("id", "arrow-dull").attr("viewBox", "0 -5 10 10")
+           .attr("refX", 25).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
+           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#334155");
+
+        // Zeichne alle Links
+        svg.selectAll(".link")
+           .data(links).enter().append("line")
            .attr("stroke", d => {
-               // Check if this link is part of final path
+               // Ist dieser Link Teil des Ergebnispfades?
                const isPath = finalPathEdges.some(e => e.s === d.source && e.t === d.target);
                return isPath ? "#38bdf8" : "#334155";
            })
-           .attr("stroke-width", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? 6 : 2)
-           .attr("marker-end", "url(#arrowhead-res)")
-           .attr("x1", d => getNodeBase(d.source).x).attr("y1", d => getNodeBase(d.source).y)
-           .attr("x2", d => getNodeBase(d.target).x).attr("y2", d => getNodeBase(d.target).y);
+           .attr("stroke-width", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? 4 : 1)
+           .attr("stroke-dasharray", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? "none" : "5,5")
+           .attr("marker-end", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? "url(#arrow-res)" : "url(#arrow-dull)")
+           .attr("x1", d => getBaseNode(d.source).x).attr("y1", d => getBaseNode(d.source).y)
+           .attr("x2", d => getBaseNode(d.target).x).attr("y2", d => getBaseNode(d.target).y);
 
-        // Labels
+        // Kosten Labels
         svg.selectAll(".lbl").data(links).enter().append("text")
-           .attr("fill", "white").attr("font-size", 14)
-           .attr("x", d => (getNodeBase(d.source).x + getNodeBase(d.target).x)/2)
-           .attr("y", d => (getNodeBase(d.source).y + getNodeBase(d.target).y)/2 - 5)
+           .attr("fill", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? "#fff" : "#475569")
+           .attr("font-size", 12)
+           .attr("x", d => (getBaseNode(d.source).x + getBaseNode(d.target).x)/2)
+           .attr("y", d => (getBaseNode(d.source).y + getBaseNode(d.target).y)/2 - 5)
            .text(d => d.weight);
 
-        // Nodes
+        // Knoten
         const g = svg.selectAll(".node").data(nodes).enter().append("g").attr("transform", d => `translate(${d.x},${d.y})`);
-        g.append("circle").attr("r", 20).attr("fill", d => ['A','B','C','E'].includes(d.id) ? "#10b981" : "#1e293b").attr("stroke", "white");
-        g.append("text").attr("dy", 5).attr("text-anchor", "middle").attr("fill", "white").attr("font-weight", "bold").text(d => d.id);
-    }
-
-    // --- Helper ---
-    function getNodeBase(id) { return nodes.find(n => n.id === id); }
-    
-    function renderGraph(containerId, nodeData, linkData, highlightCurrent, currentId) {
-        d3.select(containerId).selectAll("*").remove();
-        const container = document.querySelector(containerId);
-        const w = container.clientWidth, h = container.clientHeight;
-        const svg = d3.select(containerId).append("svg").attr("width", w).attr("height", h);
-
-        svg.append("defs").append("marker").attr("id", "arrow").attr("viewBox", "0 -5 10 10")
-           .attr("refX", 25).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
-           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#64748b");
-
-        svg.selectAll("line").data(linkData).enter().append("line")
-           .attr("stroke", "#64748b").attr("stroke-width", 2).attr("marker-end", "url(#arrow)")
-           .attr("x1", d => getNodeBase(d.source).x).attr("y1", d => getNodeBase(d.source).y)
-           .attr("x2", d => getNodeBase(d.target).x).attr("y2", d => getNodeBase(d.target).y);
         
-        svg.selectAll(".w-lbl").data(linkData).enter().append("text")
-           .attr("fill", "#94a3b8").attr("x", d => (getNodeBase(d.source).x + getNodeBase(d.target).x)/2)
-           .attr("y", d => (getNodeBase(d.source).y + getNodeBase(d.target).y)/2 -5).text(d => d.weight);
-
-        const g = svg.selectAll("g").data(nodeData).enter().append("g").attr("transform", d => `translate(${d.x},${d.y})`);
-        
-        g.append("circle").attr("r", 20)
-         .attr("fill", d => d.id === currentId ? "#f59e0b" : (d.visited ? "#10b981" : "#1e293b"))
-         .attr("stroke", "#e2e8f0").attr("stroke-width", 2);
+        g.append("circle")
+         .attr("r", 20)
+         .attr("fill", d => ['A','B','C','E'].includes(d.id) ? "#10b981" : "#1e293b")
+         .attr("stroke", "white")
+         .attr("stroke-width", 2);
          
         g.append("text").attr("dy", 5).attr("text-anchor", "middle").attr("fill", "white").attr("font-weight", "bold").text(d => d.id);
-        g.append("text").attr("dy", -30).attr("text-anchor", "middle").attr("fill", "#38bdf8").text(d => d.dist === Infinity ? "∞" : d.dist);
+        
+        function getBaseNode(id) { return nodes.find(n => n.id === id); }
     }
+    
+    // Initial Start
+    resetDijkstra();
 </script>
 </body>
 </html>
