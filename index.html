@@ -1,648 +1,256 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en" dir="ltr" id="main-html">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Dijkstra Algorithmus - Interaktive Präsentation</title>
-    
-    <!-- Libraries laden -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic Sciences & Quran Academy</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Grundlayout und Schrift */
-        body, html { 
-            width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #0f172a; color: #e2e8f0; 
+        :root {
+            --emerald-primary: #059669;
+            --emerald-dark: #064e3b;
         }
-        
-        /* Folien-Übergänge (Fade & Scale) */
-        .slide {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; transform: scale(0.95); pointer-events: none; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column; padding: 2rem; box-sizing: border-box;
-            background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+        body {
+            font-family: 'Inter', 'Vazirmatn', sans-serif;
+            scroll-behavior: smooth;
         }
-        .slide.active { opacity: 1; transform: scale(1); pointer-events: all; z-index: 10; }
-
-        /* Glassmorphism Design (Die "Karten") */
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease;
+        .rtl { font-family: 'Vazirmatn', sans-serif; }
+        .hero-gradient {
+            background: linear-gradient(135deg, #064e3b 0%, #059669 100%);
         }
-        .glass-panel:hover { border-color: rgba(255, 255, 255, 0.2); }
-
-        /* Text Highlights */
-        .highlight-text { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        
-        /* Buttons */
-        .nav-button {
-            background: rgba(56, 189, 248, 0.1); color: #38bdf8;
-            padding: 0.8rem 1.5rem; border-radius: 9999px; font-weight: 600;
-            cursor: pointer; transition: all 0.2s; border: 1px solid rgba(56, 189, 248, 0.3);
-            backdrop-filter: blur(4px); display: flex; align-items: center; gap: 8px;
+        /* Language Selection Overlay */
+        #lang-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .nav-button:hover { background: rgba(56, 189, 248, 0.3); transform: translateY(-2px); box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        .nav-button:active { transform: translateY(0); }
-        .nav-button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; filter: grayscale(1); }
-
-        /* Graph SVG Styles */
-        svg { width: 100%; height: 100%; overflow: visible; }
-        .node circle { transition: all 0.5s ease; cursor: pointer; }
-        .node text { font-family: 'Segoe UI', sans-serif; font-weight: bold; pointer-events: none; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-        
-        /* Tabellen Styles */
-        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 0.5rem; font-size: 0.9rem; }
-        th, td { padding: 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        th { background-color: rgba(15, 23, 42, 0.8); color: #38bdf8; position: sticky; top: 0; font-weight: 600; }
-        tr:last-child td { border-bottom: none; }
-        tr.highlight-row { background-color: rgba(56, 189, 248, 0.15); }
-        td.updated { color: #facc15; font-weight: bold; animation: pulse 1s infinite; }
-
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
 
-<!-- SLIDE 1: Intro -->
-<div class="slide active flex justify-center items-center text-center" id="slide-1">
-    <div class="absolute inset-0 z-0 opacity-10">
-        <!-- Grid Background -->
-        <svg width="100%" height="100%"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#38bdf8" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)" /></svg>
-    </div>
-    <div class="z-10 relative animate-fade-in-up">
-        <div class="inline-block mb-4 px-4 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-sm tracking-wider uppercase">Informatik Präsentation</div>
-        <h1 class="text-7xl font-extrabold mb-6 text-white drop-shadow-2xl tracking-tight">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Dijkstra</span> Algorithmus
-        </h1>
-        <h2 class="text-2xl text-slate-400 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
-            Wie Computer den <span class="text-white font-medium">schnellsten Weg</span> in einem Netzwerk finden.
-        </h2>
-        
-        <div class="flex justify-center gap-6">
-            <div class="glass-panel p-4 w-40 flex flex-col items-center hover:-translate-y-1">
-                <i class="fas fa-route text-3xl text-green-400 mb-2"></i>
-                <span class="text-sm font-bold">Routing</span>
+    <!-- Initial Language Selection -->
+    <div id="lang-overlay">
+        <div class="text-center p-8 max-w-md w-full">
+            <div class="bg-emerald-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                </svg>
             </div>
-            <div class="glass-panel p-4 w-40 flex flex-col items-center hover:-translate-y-1">
-                <i class="fas fa-gamepad text-3xl text-purple-400 mb-2"></i>
-                <span class="text-sm font-bold">Games</span>
-            </div>
-            <div class="glass-panel p-4 w-40 flex flex-col items-center hover:-translate-y-1">
-                <i class="fas fa-network-wired text-3xl text-yellow-400 mb-2"></i>
-                <span class="text-sm font-bold">Netzwerke</span>
+            <h2 class="text-2xl font-bold mb-8 text-gray-900">Choose Your Language / زبان را انتخاب کنید</h2>
+            <div class="space-y-4">
+                <button onclick="setLanguage('en')" class="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition">English</button>
+                <button onclick="setLanguage('prs')" class="w-full py-4 border-2 border-emerald-600 text-emerald-700 rounded-xl font-bold hover:bg-emerald-50 transition">Dari (دری)</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- SLIDE 2: Theorie -->
-<div class="slide" id="slide-2">
-    <h1 class="text-5xl font-bold text-white mb-2">Was ist das?</h1>
-    <h2 class="text-xl text-blue-400 mb-10">Grundlagen und Regeln</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 flex-1 items-center">
-        <div class="glass-panel p-10 h-full flex flex-col justify-center space-y-8 relative overflow-hidden">
-            <!-- Decorative Icon Background -->
-            <i class="fas fa-project-diagram absolute -right-10 -bottom-10 text-9xl text-white opacity-5"></i>
-            
-            <div class="flex items-start">
-                <div class="bg-blue-500/20 p-3 rounded-lg mr-4"><i class="fas fa-bullseye text-blue-400 text-xl"></i></div>
-                <div>
-                    <h3 class="text-xl font-bold text-white">Ziel</h3>
-                    <p class="text-slate-400">Findet den kürzesten Pfad von einem Startknoten zu allen anderen.</p>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-emerald-800" data-key="nav-brand">Islamic Academy</span>
                 </div>
-            </div>
-
-            <div class="flex items-start">
-                <div class="bg-yellow-500/20 p-3 rounded-lg mr-4"><i class="fas fa-utensils text-yellow-400 text-xl"></i></div>
-                <div>
-                    <h3 class="text-xl font-bold text-white">Prinzip: Greedy</h3>
-                    <p class="text-slate-400">Der Algorithmus ist "gierig". Er wählt immer den Knoten, der momentan am nächsten liegt.</p>
-                </div>
-            </div>
-
-            <div class="flex items-start">
-                <div class="bg-red-500/20 p-3 rounded-lg mr-4"><i class="fas fa-exclamation-triangle text-red-400 text-xl"></i></div>
-                <div>
-                    <h3 class="text-xl font-bold text-white">Wichtige Regel</h3>
-                    <p class="text-slate-400">Funktioniert <strong>NICHT</strong> mit negativen Kantengewichten (z.B. -5).</p>
+                <div class="hidden md:flex items-center space-x-8 rtl:space-x-reverse">
+                    <a href="#home" class="text-gray-600 hover:text-emerald-600 font-medium transition" data-key="nav-home">Home</a>
+                    <a href="#programs" class="text-gray-600 hover:text-emerald-600 font-medium transition" data-key="nav-programs">Programs</a>
+                    <button onclick="document.getElementById('lang-overlay').style.display='flex'" class="text-emerald-600 font-bold px-3 py-1 border border-emerald-600 rounded">
+                        <span data-key="nav-lang">EN/دری</span>
+                    </button>
+                    <a href="#contact" class="bg-emerald-600 text-white px-5 py-2 rounded-lg hover:bg-emerald-700 transition shadow-sm" data-key="nav-btn">Contact Us</a>
                 </div>
             </div>
         </div>
-        
-        <!-- Interactive-looking Graphic placeholder -->
-        <div class="flex flex-col justify-center items-center glass-panel p-8 h-full bg-gradient-to-br from-slate-800 to-slate-900 border-none">
-            <div class="text-center mb-6">
-                <i class="fas fa-map-marked-alt text-6xl text-blue-500 mb-4 animate-bounce"></i>
-                <p class="text-lg font-semibold">Stell dir vor: Google Maps</p>
-                <p class="text-sm text-slate-500">Du willst von Nürnberg nach Kopenhagen.</p>
-            </div>
-            <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-500 w-2/3 shadow-[0_0_10px_#3b82f6]"></div>
-            </div>
-            <div class="flex justify-between w-full mt-2 text-xs text-slate-500 font-mono">
-                <span>Nürnberg</span>
-                <span>Berechne...</span>
-                <span>Kopenhagen</span>
-            </div>
-        </div>
-    </div>
-</div>
+    </nav>
 
-<!-- SLIDE 3: Ablauf -->
-<div class="slide" id="slide-3">
-    <h1 class="text-4xl font-bold text-white mb-12 text-center">Der Algorithmus in 3 Phasen</h1>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 h-full pb-10 px-10">
-        
-        <!-- Phase 1 -->
-        <div class="glass-panel p-8 flex flex-col items-center text-center group hover:bg-slate-800/80 transition-colors">
-            <div class="w-24 h-24 rounded-full bg-blue-500/20 border border-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                <span class="text-4xl font-bold text-blue-400">1</span>
-            </div>
-            <h3 class="text-2xl font-bold text-white mb-3">Initialisierung</h3>
-            <p class="text-slate-400 leading-relaxed">
-                Setze Distanz zum Start auf <strong class="text-white">0</strong>.<br>
-                Setze alle anderen auf <strong class="text-white">Unendlich (∞)</strong>.<br>
-                Markiere alle als "unbesucht".
+    <!-- Hero Section -->
+    <header id="home" class="hero-gradient text-white py-24 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight" data-key="hero-title">
+                Quranic & Islamic Character Education
+            </h1>
+            <p class="text-xl md:text-2xl mb-10 text-emerald-100 leading-relaxed" data-key="hero-sub">
+                Teaching the Holy Quran from beginner level to Hifz, alongside the Sunnah and the life of Prophet Muhammad (SAW).
             </p>
-        </div>
-
-        <!-- Phase 2 -->
-        <div class="glass-panel p-8 flex flex-col items-center text-center group hover:bg-slate-800/80 transition-colors">
-            <div class="w-24 h-24 rounded-full bg-yellow-500/20 border border-yellow-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                <span class="text-4xl font-bold text-yellow-400">2</span>
+            <div class="flex justify-center gap-4">
+                <a href="#contact" class="bg-white text-emerald-800 px-10 py-4 rounded-full font-bold hover:bg-gray-100 transition shadow-lg" data-key="hero-btn">Inquire Now</a>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-3">Relaxation</h3>
-            <p class="text-slate-400 leading-relaxed">
-                Prüfe Nachbarn des aktuellen Knotens.<br>
-                Ist der Weg über hier kürzer?<br>
-                <code class="bg-slate-900 px-2 py-1 rounded text-yellow-300 text-sm block mt-2">Wenn (Neu < Alt) update!</code>
-            </p>
         </div>
+    </header>
 
-        <!-- Phase 3 -->
-        <div class="glass-panel p-8 flex flex-col items-center text-center group hover:bg-slate-800/80 transition-colors">
-            <div class="w-24 h-24 rounded-full bg-green-500/20 border border-green-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(34,197,94,0.3)]">
-                <span class="text-4xl font-bold text-green-400">3</span>
+    <!-- Consultation Note -->
+    <section class="bg-emerald-50 py-10 border-b border-emerald-100">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="inline-block bg-white p-6 rounded-2xl shadow-sm border border-emerald-200">
+                <p class="text-emerald-800 font-bold text-lg mb-2" data-key="cons-title">Personalized Focus</p>
+                <p class="text-gray-600" data-key="cons-text">The specific focus and pace of study are determined individually for each student after a detailed consultation with our instructors.</p>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-3">Wähle Minimum</h3>
-            <p class="text-slate-400 leading-relaxed">
-                Wähle den unbesuchten Knoten mit der <strong>kleinsten</strong> Distanz.<br>
-                Wiederhole Phase 2.<br>
-                Bis alle besucht sind.
-            </p>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- SLIDE 4: Simulation -->
-<div class="slide" id="slide-4">
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-white">Live Simulation</h1>
-            <p class="text-slate-400 text-sm">Klicke dich Schritt für Schritt durch den Graphen.</p>
-        </div>
-        <div class="flex gap-4">
-             <button class="nav-button bg-red-500/10 text-red-400 border-red-500/50 hover:bg-red-500/30" onclick="resetDijkstra()">
-                 <i class="fas fa-undo"></i> Reset
-            </button>
-            <button id="step-btn" class="nav-button bg-green-500/10 text-green-400 border-green-500/50 hover:bg-green-500/30" onclick="nextStep()">
-                <i class="fas fa-play"></i> Nächster Schritt
-            </button>
-        </div>
-    </div>
-
-    <div class="flex flex-1 gap-6 h-full overflow-hidden">
-        <!-- Linke Seite: Graph -->
-        <div class="w-2/3 glass-panel relative overflow-hidden bg-gradient-to-b from-slate-900/50 to-transparent" id="graph-container">
-            <!-- D3 Graph wird hier gerendert -->
-        </div>
-
-        <!-- Rechte Seite: Info & Tabelle -->
-        <div class="w-1/3 flex flex-col gap-4 h-full">
-            <!-- Status Box -->
-            <div class="glass-panel p-5 min-h-[120px] border-l-4 border-blue-500 flex flex-col justify-center">
-                <h3 class="text-blue-300 font-bold uppercase text-xs tracking-wider mb-1">Aktueller Status</h3>
-                <p id="status-text" class="text-lg text-white leading-snug">Warte auf Start...</p>
-            </div>
+    <!-- Programs -->
+    <section id="programs" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4 text-emerald-900" data-key="prog-title">Our Curriculum</h2>
+            <p class="text-gray-500 mb-16 max-w-2xl mx-auto" data-key="prog-sub">Comprehensive Islamic education focusing on both knowledge and character.</p>
             
-            <!-- Tabelle -->
-            <div class="glass-panel p-0 flex-1 overflow-hidden flex flex-col">
-                <div class="p-4 bg-slate-800/50 border-b border-white/10 flex justify-between items-center">
-                    <h3 class="text-yellow-400 font-bold"><i class="fas fa-table mr-2"></i>Distanztabelle</h3>
-                    <span class="text-xs text-slate-500">Automatische Updates</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Quran -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition">
+                    <div class="bg-emerald-600 text-white w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-emerald-900" data-key="c1-title">Quran: Beginner to Hifz</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed" data-key="c1-desc">Starting from the alphabet and Tajweed to complete memorization of the Holy Quran.</p>
                 </div>
-                <div class="overflow-auto flex-1 p-2">
-                    <table id="dijkstra-table">
-                        <thead><tr><th>Knoten</th><th>Kosten</th><th>Vorgänger</th></tr></thead>
-                        <tbody id="table-body">
-                            <!-- JS füllt das hier -->
-                        </tbody>
-                    </table>
+
+                <!-- Manners -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition">
+                    <div class="bg-emerald-600 text-white w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-emerald-900" data-key="c2-title">Sunnah & Character</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed" data-key="c2-desc">Teaching students how to behave and live according to the beautiful Sunnah of the Prophet.</p>
+                </div>
+
+                <!-- Seerah -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition">
+                    <div class="bg-emerald-600 text-white w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-emerald-900" data-key="c3-title">Seerah & Life Study</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed" data-key="c3-desc">Learning from the life of Prophet Muhammad (SAW) to find inspiration for modern life.</p>
+                </div>
+
+                <!-- Islamic Studies -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition">
+                    <div class="bg-emerald-600 text-white w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-emerald-900" data-key="c4-title">Islamic Essentials</h3>
+                    <p class="text-gray-600 text-sm leading-relaxed" data-key="c4-desc">Building a strong foundation in Islamic beliefs, daily prayers, and religious duties.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Contact Info Only -->
+    <section id="contact" class="py-24 bg-emerald-900 text-white text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <h2 class="text-4xl font-bold mb-8" data-key="contact-title">Contact Our Instructors</h2>
+            <p class="text-emerald-100 text-xl mb-12" data-key="contact-sub">To begin your journey or ask questions, please reach out to us directly via WhatsApp or Email. We will discuss your goals and create a plan that fits your needs.</p>
             
-            <!-- Legende -->
-            <div class="flex justify-between px-2 text-xs text-slate-400">
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-slate-700 border border-slate-500 mr-2"></span>Unbesucht</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2 shadow-[0_0_8px_#f59e0b]"></span>Aktuell</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span>Erledigt</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- SLIDE 5: Ergebnis -->
-<div class="slide" id="slide-5">
-    <h1 class="text-4xl font-bold text-white mb-2">Das Ergebnis</h1>
-    <h2 class="text-xl text-green-400 mb-8">Rückverfolgung (Backtracking)</h2>
-
-    <div class="flex flex-1 gap-8 h-full">
-        <!-- Ergebnis Graph -->
-        <div class="w-1/2 glass-panel relative" id="result-graph-container"></div>
-        
-        <!-- Erklärung -->
-        <div class="w-1/2 flex flex-col justify-center gap-6">
-            <div class="glass-panel p-8">
-                <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-shoe-prints text-blue-400 mr-3"></i>Wie finden wir den Weg?</h3>
-                <p class="text-slate-300 mb-6">Die Tabelle ist fertig. Jetzt gehen wir vom Ziel <strong class="text-white">RÜCKWÄRTS</strong> zum Start.</p>
-                
-                <div class="space-y-3 relative">
-                    <!-- Line connecting dots -->
-                    <div class="absolute left-[15px] top-3 bottom-3 w-0.5 bg-slate-600"></div>
-                    
-                    <div class="flex items-center relative z-10">
-                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-green-500 flex items-center justify-center font-bold text-green-500 mr-4">1</div>
-                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">Ziel ist <strong>E</strong>. Vorgänger war <span class="text-yellow-400 font-bold">C</span>.</div>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-12">
+                <div class="flex flex-col items-center gap-4">
+                    <div class="bg-emerald-700 p-6 rounded-full shadow-lg">
+                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
                     </div>
-                    <div class="flex items-center relative z-10">
-                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-blue-500 flex items-center justify-center font-bold text-blue-500 mr-4">2</div>
-                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">Gehe zu C. Vorgänger war <span class="text-yellow-400 font-bold">B</span>.</div>
-                    </div>
-                    <div class="flex items-center relative z-10">
-                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-blue-500 flex items-center justify-center font-bold text-blue-500 mr-4">3</div>
-                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">Gehe zu B. Vorgänger war <span class="text-yellow-400 font-bold">A</span>.</div>
-                    </div>
-                    <div class="flex items-center relative z-10">
-                        <div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center font-bold text-white mr-4">4</div>
-                        <div class="bg-slate-800/50 p-2 rounded w-full border border-slate-700">A ist Start. <strong>Fertig!</strong></div>
-                    </div>
+                    <p class="text-sm text-emerald-300" data-key="cont-phone">WhatsApp / Phone</p>
+                    <span class="text-2xl font-bold" dir="ltr">+93 (0) 7XX XXX XXX</span>
                 </div>
-            </div>
 
-            <!-- Final Stats -->
-            <div class="glass-panel p-6 text-center bg-gradient-to-r from-blue-900/40 to-slate-900/40 border-blue-500/30">
-                <h3 class="text-slate-400 uppercase text-xs tracking-widest mb-2">Finaler Pfad</h3>
-                <div class="text-3xl font-bold text-white mb-2 flex justify-center items-center gap-3">
-                    A <i class="fas fa-arrow-right text-sm text-slate-500"></i> B <i class="fas fa-arrow-right text-sm text-slate-500"></i> C <i class="fas fa-arrow-right text-sm text-slate-500"></i> E
-                </div>
-                <div class="inline-block bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-sm font-bold border border-green-500/30">
-                    Kosten: 250
+                <div class="flex flex-col items-center gap-4">
+                    <div class="bg-emerald-700 p-6 rounded-full shadow-lg">
+                        <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <p class="text-sm text-emerald-300" data-key="cont-email">Email Address</p>
+                    <span class="text-2xl font-bold">quran.academy@example.af</span>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- SLIDE 6: Ende -->
-<div class="slide" id="slide-6">
-    <div class="flex flex-col justify-center items-center h-full text-center">
-        <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-5xl text-white shadow-2xl mb-8 animate-bounce">
-            <i class="fas fa-check"></i>
-        </div>
-        <h1 class="text-6xl font-bold text-white mb-6">Vielen Dank!</h1>
-        <p class="text-2xl text-slate-300 mb-12 font-light">Der schnellste Weg zum Applaus.</p>
-        
-        <div class="glass-panel p-8 max-w-2xl w-full text-left">
-            <h3 class="text-xl text-blue-400 font-bold mb-4 border-b border-white/10 pb-2">Zusammenfassung</h3>
-            <ul class="space-y-4">
-                <li class="flex items-center text-slate-200"><i class="fas fa-check-circle text-green-500 mr-3"></i> Dijkstra findet immer das Optimum (bei positiven Gewichten).</li>
-                <li class="flex items-center text-slate-200"><i class="fas fa-check-circle text-green-500 mr-3"></i> Grundlage für Navi, Internet-Routing & KI.</li>
-                <li class="flex items-center text-slate-200"><i class="fas fa-check-circle text-green-500 mr-3"></i> Effizienter als bloßes Raten (Brute Force).</li>
-            </ul>
-        </div>
-        
-        <p class="mt-12 text-slate-500 text-sm">Präsentation erstellt mit HTML, TailwindCSS & D3.js</p>
-    </div>
-</div>
+    <footer class="bg-emerald-950 text-emerald-700 py-10 text-center" data-key="footer">© 2025 Islamic Academy - All Rights Reserved</footer>
 
-<!-- Navigation Bar (Fixed Bottom) -->
-<div class="fixed bottom-0 left-0 w-full p-6 flex justify-between items-end pointer-events-none z-50">
-    <div class="pointer-events-auto">
-        <!-- Optional: Logo oder Name -->
-    </div>
-    <div class="flex gap-4 items-center pointer-events-auto bg-slate-900/80 backdrop-blur-md p-2 rounded-full border border-slate-700 shadow-2xl">
-        <button class="nav-button w-12 h-12 justify-center p-0 rounded-full" onclick="changeSlide(-1)">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <span class="text-slate-400 font-mono w-16 text-center select-none" id="page-indicator">1 / 6</span>
-        <button class="nav-button w-12 h-12 justify-center p-0 rounded-full" onclick="changeSlide(1)">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-    </div>
-</div>
-
-<script>
-    // --- KONFIGURATION & DATEN ---
-    let currentSlide = 1;
-    const totalSlides = 6;
-    
-    // Graph Koordinaten (angepasst an Video Layout)
-    const nodes = [
-        { id: 'A', x: 150, y: 250 }, 
-        { id: 'B', x: 350, y: 100 },
-        { id: 'C', x: 550, y: 100 }, 
-        { id: 'D', x: 350, y: 400 },
-        { id: 'E', x: 650, y: 300 }
-    ];
-    
-    const links = [
-        { source: 'A', target: 'B', weight: 100 }, 
-        { source: 'A', target: 'D', weight: 50 },
-        { source: 'B', target: 'C', weight: 100 }, 
-        { source: 'B', target: 'E', weight: 250 }, // Achtung: im Video war ein B->E Link
-        { source: 'D', target: 'B', weight: 100 }, // D nach B
-        { source: 'D', target: 'E', weight: 250 },
-        { source: 'C', target: 'E', weight: 50 }
-    ];
-
-    // Status für Simulation
-    let simNodes = []; 
-    // Der Pfad für die Ergebnis-Folie (Hardcoded für Visualisierung)
-    const finalPathEdges = [
-        {s:'A', t:'B'}, {s:'B', t:'C'}, {s:'C', t:'E'}
-    ];
-
-    // --- NAVIGATION LOGIK ---
-    function changeSlide(direction) {
-        const prevSlide = document.getElementById(`slide-${currentSlide}`);
-        prevSlide.classList.remove('active');
-        
-        currentSlide += direction;
-        if (currentSlide < 1) currentSlide = 1;
-        if (currentSlide > totalSlides) currentSlide = totalSlides;
-        
-        const nextSlide = document.getElementById(`slide-${currentSlide}`);
-        nextSlide.classList.add('active');
-        
-        document.getElementById('page-indicator').innerText = `${currentSlide} / ${totalSlides}`;
-        
-        // Initialsierung spezieller Folien
-        if(currentSlide === 4) {
-            if(simNodes.length === 0) resetDijkstra(); // Nur beim ersten Mal oder Reset
-            else renderSimGraph(); // Sonst redraw status
-        }
-        if(currentSlide === 5) initResultGraph();
-    }
-    
-    // Key Navigation
-    document.addEventListener('keydown', (e) => {
-        if(e.key === "ArrowRight" || e.key === " ") changeSlide(1);
-        if(e.key === "ArrowLeft") changeSlide(-1);
-    });
-
-    // --- SIMULATION LOGIK (Slide 4) ---
-    
-    function resetDijkstra() {
-        // Deep Copy & Reset
-        simNodes = JSON.parse(JSON.stringify(nodes));
-        simNodes.forEach(n => { 
-            n.dist = Infinity; 
-            n.pred = null; 
-            n.visited = false; 
-        });
-        simNodes[0].dist = 0; // Start A
-        
-        document.getElementById('step-btn').disabled = false;
-        document.getElementById('step-btn').innerHTML = '<i class="fas fa-play"></i> Start';
-        document.getElementById('step-btn').classList.remove('bg-slate-500/10', 'text-slate-400');
-        document.getElementById('step-btn').classList.add('bg-green-500/10', 'text-green-400');
-        
-        document.getElementById('status-text').innerHTML = "Initialisierung fertig.<br>Startknoten A hat Distanz 0.";
-        
-        renderSimGraph();
-        updateTable();
-    }
-
-    function nextStep() {
-        // 1. Finde unbesuchten Knoten mit kleinster Distanz
-        const unvisited = simNodes.filter(n => !n.visited);
-        
-        // Check ob fertig
-        if (unvisited.length === 0 || unvisited.every(n => n.dist === Infinity)) {
-            document.getElementById('status-text').innerHTML = "<span class='text-green-400 font-bold'><i class='fas fa-flag-checkered'></i> FERTIG!</span><br>Alle erreichbaren Knoten besucht.";
-            document.getElementById('step-btn').disabled = true;
-            document.getElementById('step-btn').innerText = "Abgeschlossen";
-            document.getElementById('step-btn').classList.remove('bg-green-500/10', 'text-green-400');
-            document.getElementById('step-btn').classList.add('bg-slate-500/10', 'text-slate-400');
-            renderSimGraph();
-            return;
-        }
-
-        // Sortieren nach Distanz
-        unvisited.sort((a, b) => a.dist - b.dist);
-        const current = unvisited[0];
-        current.visited = true; // Markiere als besucht
-
-        let updates = [];
-
-        // 2. Nachbarn prüfen (Relaxation)
-        const neighbors = links.filter(l => l.source === current.id);
-        
-        neighbors.forEach(l => {
-            const targetNode = simNodes.find(n => n.id === l.target);
-            if(!targetNode.visited) {
-                const newDist = current.dist + l.weight;
-                if(newDist < targetNode.dist) {
-                    targetNode.dist = newDist;
-                    targetNode.pred = current.id;
-                    updates.push(targetNode.id);
-                }
+    <script>
+        const translations = {
+            en: {
+                dir: 'ltr',
+                'nav-brand': 'Islamic Academy',
+                'nav-home': 'Home',
+                'nav-programs': 'Programs',
+                'nav-btn': 'Contact Us',
+                'nav-lang': 'دری',
+                'hero-title': 'Quranic & Islamic Character Education',
+                'hero-sub': 'Teaching the Holy Quran from beginner level to Hifz, alongside the Sunnah and the life of Prophet Muhammad (SAW).',
+                'hero-btn': 'Inquire Now',
+                'cons-title': 'Personalized Focus',
+                'cons-text': 'The specific focus and pace of study are determined individually for each student after a detailed consultation with our instructors.',
+                'prog-title': 'Our Curriculum',
+                'prog-sub': 'Comprehensive Islamic education focusing on both knowledge and character.',
+                'c1-title': 'Quran: Beginner to Hifz',
+                'c1-desc': 'Starting from the alphabet and Tajweed to complete memorization of the Holy Quran.',
+                'c2-title': 'Sunnah & Character',
+                'c2-desc': 'Teaching students how to behave and live according to the beautiful Sunnah of the Prophet.',
+                'c3-title': 'Seerah & Life Study',
+                'c3-desc': 'Learning from the life of Prophet Muhammad (SAW) to find inspiration for modern life.',
+                'c4-title': 'Islamic Essentials',
+                'c4-desc': 'Building a strong foundation in Islamic beliefs, daily prayers, and religious duties.',
+                'contact-title': 'Contact Our Instructors',
+                'contact-sub': 'To begin your journey or ask questions, please reach out to us directly via WhatsApp or Email. We will discuss your goals and create a plan that fits your needs.',
+                'cont-phone': 'WhatsApp / Phone',
+                'cont-email': 'Email Address',
+                'footer': '© 2025 Islamic Academy - All Rights Reserved'
+            },
+            prs: {
+                dir: 'rtl',
+                'nav-brand': 'مرکز آموزش‌های اسلامی',
+                'nav-home': 'صفحه اصلی',
+                'nav-programs': 'برنامه‌های درسی',
+                'nav-btn': 'تماس با ما',
+                'nav-lang': 'EN',
+                'hero-title': 'آموزش قرآن کریم و تربیت شخصیت اسلامی',
+                'hero-sub': 'تدریس قرآن کریم از سطح ابتدایی تا حفظ کامل، همراه با آموزش سنت و سیرت حضرت محمد (ص).',
+                'hero-btn': 'تماس با ما',
+                'cons-title': 'تمرکز شخصی‌سازی شده',
+                'cons-text': 'تمرکز خاص و سرعت پیشرفت در دروس برای هر شاگرد به صورت جداگانه، پس از صحبت با اساتید تعیین می‌گردد.',
+                'prog-title': 'برنامه درسی ما',
+                'prog-sub': 'آموزش جامع اسلامی با تمرکز بر دانش و شخصیت‌سازی معنوی.',
+                'c1-title': 'قرآن: از ابتدا تا حفظ',
+                'c1-desc': 'شروع از حروف الفبا و تجوید تا حفظ کامل کلام‌الله مجید.',
+                'c2-title': 'سنت و اخلاق',
+                'c2-desc': 'آموزش آداب و رفتار اسلامی مطابق با سنت‌های زیبای پیامبر اکرم (ص).',
+                'c3-title': 'سیرت و مطالعه زندگی',
+                'c3-desc': 'یادگیری از زندگانی حضرت محمد (ص) برای الگوبرداری در زندگی امروزی.',
+                'c4-title': 'ضروریات اسلامی',
+                'c4-desc': 'ساختن یک بنیاد قوی در عقاید، نمازهای روزانه و وظایف دینی.',
+                'contact-title': 'ارتباط با اساتید ما',
+                'contact-sub': 'برای شروع یادگیری و یا پرسیدن سوالات، لطفاً مستقیماً از طریق واتس‌اپ یا ایمیل با ما در تماس شوید. ما اهداف شما را بررسی کرده و پلان مناسب را ترتیب می‌دهیم.',
+                'cont-phone': 'واتس‌اپ / شماره تماس',
+                'cont-email': 'ایمیل آدرس',
+                'footer': '© ۱۴۰۳ تمامی حقوق برای این مرکز محفوظ است'
             }
-        });
+        };
 
-        // UI Updates
-        let statusMsg = `Bearbeite <strong class="text-amber-400">${current.id}</strong> (Kosten: ${current.dist}).<br>`;
-        if(updates.length > 0) {
-            statusMsg += `Update Nachbarn: <span class="text-yellow-300">${updates.join(', ')}</span> wurden verbessert.`;
-        } else {
-            statusMsg += `Keine Verbesserungen gefunden.`;
+        function setLanguage(lang) {
+            const html = document.getElementById('main-html');
+            const data = translations[lang];
+            
+            html.dir = data.dir;
+            html.lang = lang;
+            
+            if (data.dir === 'rtl') {
+                document.body.classList.add('rtl');
+            } else {
+                document.body.classList.remove('rtl');
+            }
+
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                el.textContent = data[key];
+            });
+
+            document.getElementById('lang-overlay').style.display = 'none';
         }
-        document.getElementById('status-text').innerHTML = statusMsg;
-        document.getElementById('step-btn').innerHTML = '<i class="fas fa-step-forward"></i> Nächster Schritt';
-
-        renderSimGraph(current.id);
-        updateTable(updates);
-    }
-
-    // --- TABELLE RENDERN ---
-    function updateTable(highlightIds = []) {
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
-        
-        simNodes.forEach(n => {
-            const row = document.createElement('tr');
-            if(n.visited) row.classList.add('bg-emerald-500/10', 'text-emerald-200'); // Besucht Style
-            
-            const distDisplay = n.dist === Infinity ? "∞" : n.dist;
-            const predDisplay = n.pred ? n.pred : "-";
-            
-            // Highlight Logik
-            let distClass = "";
-            if(highlightIds.includes(n.id)) distClass = "updated";
-            
-            row.innerHTML = `
-                <td class="font-bold text-white">${n.id}</td>
-                <td class="${distClass}">${distDisplay}</td>
-                <td>${predDisplay}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    // --- GRAPH RENDERING (D3.js) ---
-    function renderSimGraph(currentId = null) {
-        const containerId = "#graph-container";
-        const container = document.querySelector(containerId);
-        d3.select(containerId).selectAll("*").remove(); // Clear SVG
-        
-        const w = container.clientWidth;
-        const h = container.clientHeight;
-        
-        const svg = d3.select(containerId).append("svg")
-            .attr("width", w).attr("height", h)
-            .attr("viewBox", `0 0 ${w} ${h}`); // Responsive
-
-        // Pfeilspitzen Definition
-        svg.append("defs").append("marker")
-           .attr("id", "arrow")
-           .attr("viewBox", "0 -5 10 10")
-           .attr("refX", 28).attr("refY", 0)
-           .attr("markerWidth", 6).attr("markerHeight", 6)
-           .attr("orient", "auto")
-           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#475569");
-
-        // Kanten (Links)
-        svg.selectAll("line")
-           .data(links).enter().append("line")
-           .attr("stroke", "#475569")
-           .attr("stroke-width", 2)
-           .attr("marker-end", "url(#arrow)")
-           .attr("x1", d => getNode(d.source).x).attr("y1", d => getNode(d.source).y)
-           .attr("x2", d => getNode(d.target).x).attr("y2", d => getNode(d.target).y);
-        
-        // Gewicht Labels
-        svg.selectAll(".w-lbl")
-           .data(links).enter().append("text")
-           .attr("fill", "#94a3b8")
-           .attr("font-size", "12px")
-           .attr("background", "black") // Trick für Lesbarkeit
-           .attr("x", d => (getNode(d.source).x + getNode(d.target).x)/2)
-           .attr("y", d => (getNode(d.source).y + getNode(d.target).y)/2 - 8)
-           .text(d => d.weight);
-
-        // Knoten Gruppen
-        const g = svg.selectAll("g")
-           .data(simNodes).enter().append("g")
-           .attr("class", "node")
-           .attr("transform", d => `translate(${d.x},${d.y})`);
-        
-        // Kreise
-        g.append("circle")
-         .attr("r", 22)
-         .attr("fill", d => {
-             if (d.id === currentId) return "#f59e0b"; // Orange (Current)
-             if (d.visited) return "#10b981"; // Green (Visited)
-             return "#1e293b"; // Dark (Default)
-         })
-         .attr("stroke", d => d.id === currentId ? "#fbbf24" : "#e2e8f0")
-         .attr("stroke-width", d => d.id === currentId ? 3 : 2)
-         // Glow Effekt für aktiven Knoten
-         .attr("filter", d => d.id === currentId ? "drop-shadow(0 0 8px rgba(245, 158, 11, 0.6))" : "");
-
-        // Knoten Text (ID)
-        g.append("text")
-         .attr("dy", 5)
-         .attr("text-anchor", "middle")
-         .attr("fill", "white")
-         .text(d => d.id);
-         
-        // Distanz Label (über dem Knoten)
-        g.append("text")
-         .attr("dy", -32)
-         .attr("text-anchor", "middle")
-         .attr("font-size", "14px")
-         .attr("font-weight", "bold")
-         .attr("fill", d => d.dist === Infinity ? "#64748b" : "#38bdf8")
-         .text(d => d.dist === Infinity ? "∞" : d.dist);
-         
-        function getNode(id) { return simNodes.find(n => n.id === id); }
-    }
-
-    // --- RESULT GRAPH (Slide 5) ---
-    function initResultGraph() {
-        const containerId = "#result-graph-container";
-        d3.select(containerId).selectAll("*").remove();
-        const container = document.querySelector(containerId);
-        const w = container.clientWidth, h = container.clientHeight;
-        const svg = d3.select(containerId).append("svg").attr("width", w).attr("height", h);
-
-        // Marker Blau für Ergebnis
-        svg.append("defs").append("marker").attr("id", "arrow-res").attr("viewBox", "0 -5 10 10")
-           .attr("refX", 25).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
-           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#38bdf8"); // Hellblau
-
-        // Marker Grau normal
-        svg.append("defs").append("marker").attr("id", "arrow-dull").attr("viewBox", "0 -5 10 10")
-           .attr("refX", 25).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
-           .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#334155");
-
-        // Zeichne alle Links
-        svg.selectAll(".link")
-           .data(links).enter().append("line")
-           .attr("stroke", d => {
-               // Ist dieser Link Teil des Ergebnispfades?
-               const isPath = finalPathEdges.some(e => e.s === d.source && e.t === d.target);
-               return isPath ? "#38bdf8" : "#334155";
-           })
-           .attr("stroke-width", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? 4 : 1)
-           .attr("stroke-dasharray", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? "none" : "5,5")
-           .attr("marker-end", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? "url(#arrow-res)" : "url(#arrow-dull)")
-           .attr("x1", d => getBaseNode(d.source).x).attr("y1", d => getBaseNode(d.source).y)
-           .attr("x2", d => getBaseNode(d.target).x).attr("y2", d => getBaseNode(d.target).y);
-
-        // Kosten Labels
-        svg.selectAll(".lbl").data(links).enter().append("text")
-           .attr("fill", d => finalPathEdges.some(e => e.s === d.source && e.t === d.target) ? "#fff" : "#475569")
-           .attr("font-size", 12)
-           .attr("x", d => (getBaseNode(d.source).x + getBaseNode(d.target).x)/2)
-           .attr("y", d => (getBaseNode(d.source).y + getBaseNode(d.target).y)/2 - 5)
-           .text(d => d.weight);
-
-        // Knoten
-        const g = svg.selectAll(".node").data(nodes).enter().append("g").attr("transform", d => `translate(${d.x},${d.y})`);
-        
-        g.append("circle")
-         .attr("r", 20)
-         .attr("fill", d => ['A','B','C','E'].includes(d.id) ? "#10b981" : "#1e293b")
-         .attr("stroke", "white")
-         .attr("stroke-width", 2);
-         
-        g.append("text").attr("dy", 5).attr("text-anchor", "middle").attr("fill", "white").attr("font-weight", "bold").text(d => d.id);
-        
-        function getBaseNode(id) { return nodes.find(n => n.id === id); }
-    }
-    
-    // Initial Start
-    resetDijkstra();
-</script>
+    </script>
 </body>
 </html>
